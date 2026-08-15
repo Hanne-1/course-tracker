@@ -1,0 +1,2728 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>學習紀錄｜我的課程進度</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pink:#C9938A; --soft-pink:#E8C4BC; --light-pink:#F5E6E3;
+  --blue:#7A9BAD; --soft-blue:#B8CFDA; --light-blue:#E3EDF3;
+  --sage:#9AAE9B; --light-sage:#E8F0E8;
+  --tan:#B29B78; --light-tan:#F1E9DA;
+  --lavender:#7D6B85; --light-lavender:#F7F5F7; --light-lavender-hover:#E4DCE6;
+  --gold:#D3B76B; --light-gold:#F8F1DC;
+  --cream:#FAF3EE; --bg:#FAFAF8; --dark:#37352F; --medium:#5A5248; --gray:#9B9A97;
+  --radius:16px;
+  --shadow: 0 2px 12px rgba(55,53,47,0.06);
+  --shadow-hover: 0 6px 20px rgba(55,53,47,0.10);
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{
+  font-family:'Noto Sans TC', sans-serif;
+  background:var(--bg);
+  color:var(--dark);
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:76px;
+}
+
+/* ---------- Header ---------- */
+header{
+  background:linear-gradient(135deg, var(--light-pink) 0%, var(--light-blue) 55%, var(--light-sage) 100%);
+  padding:28px 20px 22px;
+  position:relative;
+  overflow:hidden;
+}
+header::after{
+  content:"";
+  position:absolute;
+  right:-40px; top:-40px;
+  width:160px; height:160px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(255,255,255,0.5), transparent 70%);
+}
+.header-inner{max-width:960px; margin:0 auto; position:relative; z-index:1;}
+.eyebrow{
+  font-size:12px; letter-spacing:2px; color:var(--medium); font-weight:700;
+  text-transform:uppercase; opacity:0.75;
+}
+.eyebrow .byline{
+  font-size:9px; letter-spacing:1px; font-weight:500; opacity:0.85; margin-left:4px;
+}
+h1{
+  font-size:26px; font-weight:900; margin-top:4px; color:var(--dark);
+}
+.header-sub{font-size:13.5px; color:var(--medium); margin-top:6px;}
+.backup-bar{
+  display:flex; gap:8px; margin-top:16px; flex-wrap:wrap;
+}
+.backup-bar button{
+  font-family:inherit; font-size:12.5px; font-weight:700;
+  background:rgba(255,255,255,0.65); border:1px solid rgba(55,53,47,0.08);
+  color:var(--medium); padding:8px 14px; border-radius:99px; cursor:pointer;
+  transition:.15s;
+}
+.backup-bar button:hover{background:#fff; box-shadow:var(--shadow);}
+#importFile{display:none;}
+
+/* ---------- Nav ---------- */
+nav{
+  max-width:960px; margin:0 auto; padding:0 20px;
+  display:flex; align-items:center; gap:6px; overflow-x:auto; overflow-y:visible;
+  position:sticky; top:0; background:var(--bg); z-index:20;
+  padding-top:14px; padding-bottom:10px; border-bottom:1px solid rgba(55,53,47,0.06);
+}
+nav button{
+  font-family:inherit; font-size:13.5px; font-weight:700; white-space:nowrap; line-height:1.4;
+  background:none; border:none; color:var(--gray); cursor:pointer;
+  padding:8px 14px; border-radius:99px; transition:.15s; flex-shrink:0;
+}
+nav button.active{background:var(--lavender); color:#fff;}
+nav button:not(.active):hover{background:var(--light-lavender-hover); color:var(--dark);}
+
+main{max-width:960px; margin:0 auto; padding:22px 20px 40px;}
+.page{display:none; animation:fadeIn .25s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+/* ---------- Section titles ---------- */
+.section-title{
+  font-size:15px; font-weight:700; color:var(--dark); margin:28px 0 12px;
+  display:flex; align-items:center; gap:8px;
+}
+.section-title:first-child{margin-top:0;}
+.section-title .count-badge{
+  font-size:11px; font-weight:700; color:var(--medium); background:var(--light-blue);
+  padding:2px 9px; border-radius:99px;
+}
+
+/* ---------- Dashboard cards ---------- */
+.stat-grid{
+  display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;
+}
+.stat-card{
+  background:#fff; border-radius:var(--radius); padding:18px 16px;
+  box-shadow:var(--shadow); border:1px solid rgba(55,53,47,0.05);
+}
+.stat-card .num{font-size:28px; font-weight:900; line-height:1;}
+.stat-card .label{font-size:12.5px; color:var(--medium); margin-top:8px; font-weight:500;}
+.stat-card.pink{border-left:4px solid var(--lavender);}
+.stat-card.blue{border-left:4px solid var(--lavender);}
+.stat-card.sage{border-left:4px solid var(--lavender);}
+.stat-card.warn{border-left:4px solid var(--lavender); background:var(--light-lavender-hover);}
+
+/* ---------- Pie chart ---------- */
+.pie-panel{
+  background:#fff; border-radius:var(--radius); padding:22px; box-shadow:var(--shadow);
+  border:1px solid rgba(55,53,47,0.05); display:flex; gap:28px; align-items:center;
+  justify-content:center; flex-wrap:wrap;
+}
+.pie-chart-wrap{ position:relative; width:160px; height:160px; flex-shrink:0; }
+.pie-chart{ width:100%; height:100%; border-radius:50%; transition:background 0.3s; }
+.pie-center{
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:98px; height:98px; border-radius:50%; background:#fff;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  box-shadow: inset 0 0 0 1px rgba(55,53,47,0.06);
+}
+.pie-center-num{ font-size:23px; font-weight:900; color:var(--dark); }
+.pie-center-label{ font-size:11px; color:var(--gray); margin-top:2px; }
+.pie-legend{ display:flex; flex-direction:column; gap:12px; min-width:140px; }
+.pie-legend-item{ display:flex; align-items:center; gap:9px; font-size:13px; color:var(--medium); }
+.pie-legend-dot{ width:11px; height:11px; border-radius:50%; flex-shrink:0; }
+.pie-legend-item b{ color:var(--dark); font-weight:700; }
+.pie-empty{ text-align:center; color:var(--gray); font-size:13.5px; padding:20px; }
+.doing-detail{ margin-top:16px; }
+.doing-detail-title{ font-size:12.5px; font-weight:700; color:var(--medium); margin-bottom:10px; }
+.doing-detail-row{
+  display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:12.5px;
+}
+.doing-detail-row .ddr-name{ width:120px; flex-shrink:0; color:var(--dark); font-weight:700;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.doing-detail-row .ddr-track{ flex:1; height:7px; background:var(--light-blue); border-radius:99px; overflow:hidden; }
+.doing-detail-row .ddr-fill{ height:100%; border-radius:99px; background:linear-gradient(90deg, var(--soft-pink), var(--pink)); }
+.doing-detail-row .ddr-pct{ width:34px; text-align:right; font-weight:700; color:var(--pink); flex-shrink:0; }
+
+/* ---------- Today panel ---------- */
+.today-panel{
+  background:#fff; border-radius:var(--radius); box-shadow:var(--shadow);
+  padding:20px; margin-top:10px; border:1px solid rgba(55,53,47,0.05);
+}
+.today-empty{
+  text-align:center; padding:30px 10px; color:var(--gray); font-size:13.5px;
+}
+.today-empty .glyph{font-size:30px; display:block; margin-bottom:8px;}
+
+/* ---------- Course card (list items) ---------- */
+.course-card{
+  background:#fff; border-radius:var(--radius); padding:16px 18px;
+  box-shadow:var(--shadow); border:1px solid rgba(55,53,47,0.05);
+  margin-bottom:10px; cursor:pointer; transition:.15s;
+  display:flex; flex-direction:column; gap:10px;
+}
+.course-card:hover{box-shadow:var(--shadow-hover); transform:translateY(-1px);}
+.course-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+.course-name{font-size:15.5px; font-weight:700; color:var(--dark);}
+.course-meta{font-size:12px; color:var(--gray); margin-top:3px;}
+.status-tag{
+  font-size:11px; font-weight:700; padding:4px 10px; border-radius:99px; white-space:nowrap;
+}
+.status-todo{background:var(--light-blue); color:var(--blue);}
+.status-doing{background:var(--light-pink); color:var(--pink);}
+.status-done{background:var(--light-sage); color:var(--sage);}
+.status-overdue{background:var(--pink); color:#fff;}
+
+.progress-row{display:flex; align-items:center; gap:10px;}
+.progress-track{
+  flex:1; height:8px; background:var(--light-blue); border-radius:99px; overflow:hidden;
+}
+.progress-fill{height:100%; border-radius:99px; background:linear-gradient(90deg, var(--soft-pink), var(--pink));}
+.progress-pct{font-size:12px; font-weight:700; color:var(--medium); min-width:32px; text-align:right;}
+
+.due-badge{font-size:11.5px; font-weight:700;}
+.due-soon{color:var(--pink);}
+.due-normal{color:var(--gray);}
+.due-overdue{color:#fff; background:var(--pink); padding:2px 8px; border-radius:6px;}
+
+/* ---------- Collapsible progress item (課程進度頁) ---------- */
+.progress-item{
+  background:#fff; border-radius:var(--radius); box-shadow:var(--shadow);
+  border:1px solid rgba(55,53,47,0.05); margin-bottom:10px; overflow:hidden;
+}
+.progress-item-header{
+  display:flex; align-items:center; gap:10px; padding:14px 16px; cursor:pointer;
+}
+.progress-item-header:hover{ background:var(--light-pink); }
+.chevron-btn{
+  flex-shrink:0; width:22px; height:22px; border:none; background:var(--light-blue);
+  color:var(--medium); border-radius:6px; font-size:11px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; transition:transform .2s;
+}
+.progress-item.expanded .chevron-btn{ transform:rotate(90deg); }
+.pi-name{ flex:1; font-size:14.5px; font-weight:700; color:var(--dark); min-width:0;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.pi-progress-mini{ display:flex; align-items:center; gap:6px; width:90px; flex-shrink:0; }
+.pi-progress-mini .progress-track{ flex:1; }
+.pi-progress-mini .progress-pct{ min-width:30px; font-size:11.5px; }
+.edit-btn{
+  flex-shrink:0; width:26px; height:26px; border:none; background:var(--light-sage);
+  color:var(--sage); border-radius:7px; font-size:13px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
+.edit-btn:hover{ background:var(--sage); color:#fff; }
+.progress-item-body{
+  display:none; padding:0 16px 16px; border-top:1px solid rgba(55,53,47,0.06);
+}
+.progress-item.expanded .progress-item-body{ display:block; padding-top:12px; }
+.pi-badges{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+.pi-checklist{ display:flex; flex-direction:column; gap:5px; margin-top:6px; }
+.pi-check-row{
+  display:flex; align-items:center; gap:9px; font-size:13px; padding:5px 8px; border-radius:8px;
+  background:var(--cream);
+}
+.pi-check-row.header-row{ background:var(--light-sage); font-weight:700; margin-top:6px; }
+.pi-check-row.header-row:first-child{ margin-top:0; }
+.pi-check-row.child-row{ margin-left:18px; }
+.pi-check-row input[type=checkbox]{ width:16px; height:16px; accent-color:var(--pink); cursor:pointer; flex-shrink:0; }
+.pi-check-row span{ flex:1; }
+.pi-check-row.checked span{ color:var(--gray); text-decoration:line-through; }
+
+/* ---------- Toolbar (list page) ---------- */
+.toolbar{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;}
+.search-box{
+  flex:1; min-width:180px; background:#fff; border:1px solid rgba(55,53,47,0.1);
+  border-radius:12px; padding:10px 14px; font-family:inherit; font-size:13.5px;
+}
+.search-box:focus{outline:none; border-color:var(--soft-blue);}
+select.filter-select{
+  background:#fff; border:1px solid rgba(55,53,47,0.1); border-radius:12px;
+  padding:10px 14px; font-family:inherit; font-size:13.5px; color:var(--medium);
+}
+
+/* ---------- Empty state ---------- */
+.empty-state{
+  text-align:center; padding:50px 20px; color:var(--gray);
+}
+.empty-state .glyph{font-size:36px; display:block; margin-bottom:10px;}
+.empty-state p{font-size:13.5px;}
+
+/* ---------- FAB ---------- */
+.fab{
+  position:fixed; right:22px; bottom:22px; width:56px; height:56px; border-radius:50%;
+  background:var(--dark); color:#fff; border:none; font-size:26px; cursor:pointer;
+  box-shadow:0 6px 16px rgba(55,53,47,0.25); z-index:30; display:flex; align-items:center; justify-content:center;
+  transition:.15s;
+}
+.fab:hover{transform:scale(1.06); background:var(--pink);}
+
+/* ---------- Modal ---------- */
+.modal-overlay{
+  position:fixed; inset:0; background:rgba(55,53,47,0.35); z-index:50;
+  display:none; align-items:flex-end; justify-content:center;
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:#fff; width:100%; max-width:480px; border-radius:20px 20px 0 0;
+  padding:24px 22px 28px; max-height:90vh; overflow-y:auto;
+  animation:slideUp .25s ease;
+}
+@media(min-width:640px){
+  .modal-overlay{align-items:center;}
+  .modal{border-radius:20px; margin:20px;}
+}
+@keyframes slideUp{from{transform:translateY(30px); opacity:0;} to{transform:translateY(0); opacity:1;}}
+.modal h2{font-size:18px; font-weight:900; margin-bottom:18px;}
+.field{margin-bottom:16px;}
+.field label{display:block; font-size:12.5px; font-weight:700; color:var(--medium); margin-bottom:6px;}
+.field input[type=text], .field input[type=date]{
+  width:100%; padding:11px 13px; border:1px solid rgba(55,53,47,0.12); border-radius:10px;
+  font-family:inherit; font-size:14px; background:var(--cream);
+}
+.field input:focus{outline:none; border-color:var(--soft-blue); background:#fff;}
+.field input[type=range]{width:100%; accent-color:var(--pink);}
+.range-value{font-size:13px; font-weight:700; color:var(--pink); margin-top:4px;}
+.modal-actions{display:flex; gap:10px; margin-top:22px;}
+.btn{
+  flex:1; padding:12px; border-radius:10px; font-family:inherit; font-size:14px; font-weight:700;
+  cursor:pointer; border:none; transition:.15s;
+}
+.btn-primary{background:var(--dark); color:#fff;}
+.btn-primary:hover{background:var(--pink);}
+.btn-secondary{background:var(--light-blue); color:var(--medium);}
+.btn-secondary:hover{background:var(--soft-blue); color:#fff;}
+.btn-danger{background:var(--light-pink); color:var(--pink);}
+.btn-danger:hover{background:var(--pink); color:#fff;}
+
+.toast{
+  position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:var(--dark); color:#fff; padding:11px 22px; border-radius:99px;
+  font-size:13px; font-weight:700; opacity:0; transition:.25s; z-index:60; pointer-events:none;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+@media(max-width:900px){
+  .stat-grid{grid-template-columns:repeat(3, 1fr);}
+}
+@media(max-width:640px){
+  .stat-grid{grid-template-columns:repeat(2, 1fr);}
+  h1{font-size:22px;}
+}
+
+/* ---------- Note / link ---------- */
+.course-note{
+  font-size:12.5px; color:var(--medium); background:var(--cream);
+  border-radius:8px; padding:8px 10px; line-height:1.5;
+}
+.course-note a{ color:var(--blue); font-weight:700; text-decoration:none; word-break:break-all;}
+.course-note a:hover{ text-decoration:underline; }
+.course-login{
+  font-size:12.5px; background:var(--light-lavender); border-radius:8px; padding:8px 10px; line-height:1.5;
+}
+.course-login a{ color:var(--lavender); font-weight:700; text-decoration:none; word-break:break-all; }
+.course-login a:hover{ text-decoration:underline; }
+.stalled-badge{
+  font-size:11px; font-weight:700; color:#fff; background:var(--gray);
+  padding:3px 9px; border-radius:99px; white-space:nowrap;
+}
+.checklist-mini{
+  font-size:11.5px; font-weight:700; color:var(--medium); background:var(--light-sage);
+  padding:3px 9px; border-radius:99px; white-space:nowrap;
+}
+.recurring-badge{
+  font-size:11px; font-weight:700; background:var(--light-blue); color:var(--blue);
+  padding:3px 9px; border-radius:99px; white-space:nowrap;
+}
+
+/* ---------- Recurring schedule (in modal) ---------- */
+.schedule-box{ background:var(--cream); border-radius:12px; padding:12px; }
+.schedule-add-row{ display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; align-items:center; }
+.schedule-add-row select, .schedule-add-row input[type=time], .schedule-add-row input[type=date]{
+  padding:8px 7px; border:1px solid rgba(55,53,47,0.12); border-radius:9px;
+  font-family:inherit; font-size:12px; background:#fff; color:var(--dark);
+  flex:1 1 88px; min-width:78px;
+}
+.schedule-add-row button{
+  padding:0 14px; height:34px; border-radius:9px; border:none; background:var(--dark); color:#fff;
+  font-family:inherit; font-weight:700; font-size:12px; cursor:pointer; white-space:nowrap; flex:0 0 auto;
+}
+.schedule-add-row button:hover{ background:var(--pink); }
+.schedule-range-sep{ flex:0 0 auto; color:var(--gray); font-size:12px; }
+.schedule-list{ display:flex; flex-direction:column; gap:6px; }
+
+/* ---------- Tags (in modal) ---------- */
+.tag-list{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; min-height:20px; }
+.tag-chip{
+  display:flex; align-items:center; gap:5px; border-radius:20px; padding:5px 9px 5px 5px;
+  border:1px solid rgba(55,53,47,0.06); font-size:12.5px;
+}
+.tag-chip.dragging{ opacity:0.5; }
+.tag-chip.drag-over{ outline:2px solid var(--lavender); outline-offset:1px; }
+.tag-chip .drag-handle{ width:16px; height:16px; font-size:11px; }
+.tag-chip .remove-item{
+  background:none; border:none; font-size:14px; cursor:pointer; line-height:1; padding:0 2px;
+  opacity:0.7;
+}
+.tag-chip .remove-item:hover{ opacity:1; }
+.tag-add-row{ display:flex; gap:6px; flex-wrap:wrap; }
+.tag-add-row select, .tag-add-row input[type=text]{
+  flex:1 1 120px; padding:8px 10px; border:1px solid rgba(55,53,47,0.12); border-radius:9px;
+  font-family:inherit; font-size:12.5px; background:#fff; color:var(--dark);
+}
+.tag-add-row button{
+  padding:0 14px; height:34px; border-radius:9px; border:none; background:var(--dark); color:#fff;
+  font-family:inherit; font-weight:700; font-size:12px; cursor:pointer; flex:0 0 auto;
+}
+.tag-add-row button:hover{ background:var(--pink); }
+.tag-badge{
+  font-size:10.5px; font-weight:700; padding:2px 9px; border-radius:99px; white-space:nowrap;
+}
+.duration-badge{
+  font-size:11px; font-weight:700; padding:4px 10px; border-radius:99px; white-space:nowrap;
+  background:var(--light-tan); color:var(--tan); flex-shrink:0;
+}
+.tag-manage-link{
+  background:none; border:none; color:var(--gray); font-size:11.5px; font-weight:700;
+  cursor:pointer; text-decoration:underline; padding:6px 0 0; margin-top:2px;
+}
+.tag-manage-link:hover{ color:var(--lavender); }
+.tag-manage-list{ display:flex; flex-direction:column; gap:6px; margin-top:8px; }
+.tag-manage-row{
+  display:flex; align-items:center; gap:8px; background:#fff; border-radius:9px;
+  padding:6px 8px; border:1px solid rgba(55,53,47,0.06);
+}
+.tag-manage-row.dragging{ opacity:0.5; }
+.tag-manage-row.drag-over{ outline:2px solid var(--lavender); outline-offset:1px; }
+.tag-manage-row input[type=text]{
+  flex:1; border:none; background:transparent; font-family:inherit; font-size:12.5px;
+  color:var(--dark); padding:2px 0;
+}
+.tag-manage-row input[type=text]:focus{ outline:none; border-bottom:1px solid var(--soft-blue); }
+.tag-manage-row .remove-item{
+  background:none; border:none; color:var(--gray); font-size:16px; cursor:pointer; line-height:1;
+}
+.tag-manage-row .remove-item:hover{ color:var(--pink); }
+.schedule-chip{
+  display:flex; align-items:center; justify-content:space-between; background:#fff;
+  border-radius:9px; padding:8px 12px; border:1px solid rgba(55,53,47,0.06); font-size:13px;
+  color:var(--dark); font-weight:700;
+}
+.schedule-chip .remove-item{
+  background:none; border:none; color:var(--gray); font-size:16px; cursor:pointer; line-height:1;
+}
+.schedule-chip .remove-item:hover{ color:var(--pink); }
+.schedule-empty{ font-size:12.5px; color:var(--gray); text-align:center; padding:8px 0; }
+
+/* ---------- Checklist (in modal) ---------- */
+.checklist-box{
+  background:var(--cream); border-radius:12px; padding:12px; margin-top:4px;
+}
+.checklist-add-row{display:flex; gap:8px; margin-bottom:10px;}
+.checklist-add-row input{
+  flex:1; padding:9px 12px; border:1px solid rgba(55,53,47,0.12); border-radius:10px;
+  font-family:inherit; font-size:13.5px; background:#fff;
+}
+.checklist-add-row input:focus{outline:none; border-color:var(--soft-blue);}
+.checklist-add-row button{
+  padding:0 16px; border-radius:10px; border:none; background:var(--dark); color:#fff;
+  font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;
+}
+.checklist-add-row button:hover{background:var(--pink);}
+.checklist-bulk{ margin-bottom:12px; }
+.checklist-bulk textarea{
+  width:100%; padding:10px 12px; border:1px solid rgba(55,53,47,0.12); border-radius:10px;
+  font-family:inherit; font-size:13px; background:#fff; resize:vertical; min-height:72px;
+}
+.checklist-bulk textarea:focus{outline:none; border-color:var(--soft-blue);}
+.checklist-bulk-row{display:flex; justify-content:flex-end; margin-top:6px;}
+.checklist-bulk-row button{
+  padding:8px 14px; border-radius:10px; border:none; background:var(--blue); color:#fff;
+  font-family:inherit; font-weight:700; font-size:12.5px; cursor:pointer;
+}
+.checklist-bulk-row button:hover{ background:var(--pink); }
+.checklist-divider{
+  display:flex; align-items:center; gap:8px; font-size:11px; color:var(--gray); margin:2px 0 10px;
+}
+.checklist-divider::before, .checklist-divider::after{
+  content:""; flex:1; height:1px; background:rgba(55,53,47,0.08);
+}
+.checklist-items{display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto;}
+.checklist-item{
+  display:flex; align-items:center; gap:10px; background:#fff; border-radius:9px;
+  padding:8px 10px; border:1px solid rgba(55,53,47,0.06);
+}
+.checklist-item.header-row{
+  background:var(--light-sage); border:1px solid rgba(154,174,155,0.35); margin-top:4px;
+}
+.checklist-item.header-row:first-child{ margin-top:0; }
+.checklist-item.child-row{ margin-left:22px; }
+.checklist-item input[type=checkbox]{
+  width:18px; height:18px; accent-color:var(--pink); cursor:pointer; flex-shrink:0;
+}
+.checklist-item input[type=text]{
+  flex:1; border:none; background:transparent; font-family:inherit; font-size:13.5px;
+  color:var(--dark); padding:2px 0;
+}
+.checklist-item input[type=text]:focus{ outline:none; border-bottom:1px solid var(--soft-blue); }
+.checklist-item.header-row input[type=text]{ font-weight:700; color:var(--dark); }
+.checklist-item.checked input[type=text]{ color:var(--gray); text-decoration:line-through; }
+.checklist-item .remove-item{
+  background:none; border:none; color:var(--gray); font-size:16px; cursor:pointer; line-height:1;
+  padding:2px 6px; flex-shrink:0;
+}
+.checklist-item .remove-item:hover{ color:var(--pink); }
+.drag-handle{
+  flex-shrink:0; width:22px; height:22px; display:flex; align-items:center; justify-content:center;
+  color:var(--gray); font-size:16px; cursor:grab; touch-action:none; user-select:none;
+  border-radius:6px;
+}
+.drag-handle:hover{ background:var(--light-blue); color:var(--medium); }
+.type-toggle{
+  flex-shrink:0; width:22px; height:22px; display:flex; align-items:center; justify-content:center;
+  border:none; background:var(--light-sage); color:var(--sage); font-size:12px; cursor:pointer;
+  border-radius:6px;
+}
+.type-toggle:hover{ background:var(--sage); color:#fff; }
+.checklist-item.dragging{
+  opacity:0.5; box-shadow:var(--shadow-hover);
+}
+.checklist-item.drag-over{
+  border-top:2px solid var(--pink);
+}
+.checklist-empty{ font-size:12.5px; color:var(--gray); text-align:center; padding:10px 0; }
+.computed-progress{
+  font-size:13px; font-weight:700; color:var(--pink); margin-top:6px;
+}
+.field-hint{font-size:11.5px; color:var(--gray); margin-top:4px;}
+.checklist-add-row select{
+  border:1px solid rgba(55,53,47,0.12); border-radius:10px; padding:0 10px;
+  font-family:inherit; font-size:13px; background:#fff; color:var(--medium);
+}
+
+/* ---------- Calendar ---------- */
+.cal-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+.cal-header .cal-title{font-size:15px; font-weight:900;}
+.cal-nav{display:flex; gap:6px;}
+.cal-nav button{
+  width:32px; height:32px; border-radius:50%; border:1px solid rgba(55,53,47,0.1);
+  background:#fff; cursor:pointer; font-size:14px; color:var(--medium);
+}
+.cal-nav button:hover{background:var(--light-pink);}
+.cal-grid{
+  display:grid; grid-template-columns:repeat(7, 1fr); gap:6px;
+  background:#fff; border-radius:var(--radius); padding:16px; box-shadow:var(--shadow);
+  border:1px solid rgba(55,53,47,0.05);
+}
+.cal-dow{ text-align:center; font-size:11px; font-weight:700; color:var(--gray); padding-bottom:6px; }
+.cal-cell{
+  aspect-ratio:1; border-radius:10px; display:flex; flex-direction:column; align-items:center;
+  justify-content:flex-start; padding-top:4px; font-size:12.5px; color:var(--dark); position:relative; cursor:default;
+  overflow:hidden;
+}
+.cal-cell.empty{visibility:hidden;}
+.cal-cell.today{ background:var(--dark); color:#fff; font-weight:700; }
+.cal-cell.has-due{ background:var(--light-pink); font-weight:700; cursor:pointer; }
+.cal-cell.has-recur{ background:var(--light-blue); font-weight:700; cursor:pointer; }
+.cal-cell.has-due.has-recur{ background:linear-gradient(135deg, var(--light-pink) 50%, var(--light-blue) 50%); }
+.cal-cell.today.has-due{ background:var(--pink); }
+.cal-cell.today.has-recur{ background:var(--blue); }
+.cal-daynum{ font-size:12px; line-height:1.2; }
+.cal-names{ width:100%; margin-top:2px; display:flex; flex-direction:column; gap:1px; align-items:center; }
+.cal-name-tag{
+  font-size:8px; line-height:1.2; font-weight:700; padding:1px 3px; border-radius:3px;
+  max-width:94%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  background:rgba(255,255,255,0.6); color:var(--medium);
+}
+.cal-cell.today .cal-name-tag{ background:rgba(255,255,255,0.25); color:#fff; }
+.cal-name-more{ font-size:8px; color:var(--gray); font-weight:700; }
+.cal-cell.today .cal-name-more{ color:#fff; opacity:0.85; }
+.cal-dot{
+  width:5px; height:5px; border-radius:50%; background:var(--pink); position:absolute;
+  bottom:6px; left:50%; transform:translateX(-50%);
+}
+.cal-dot.due-dot{ left:calc(50% - 6px); }
+.cal-dot.recur-dot{ background:var(--blue); left:calc(50% + 6px); }
+.cal-cell.today .cal-dot{ background:#fff; }
+.cal-daylist{ margin-top:16px; }
+.cloud-status{ font-size:12.5px; color:var(--medium); line-height:1.6; margin-bottom:14px; }
+.cloud-reminder{
+  font-size:12px; line-height:1.6; color:var(--tan); background:var(--light-tan);
+  border-radius:10px; padding:10px 12px; margin-bottom:14px;
+}
+.cloud-status .dot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; }
+.cloud-status .dot.on{ background:var(--sage); }
+.cloud-status .dot.off{ background:var(--gray); }
+.cloud-tab-row{ display:flex; gap:8px; margin-bottom:16px; }
+.cloud-tab-row button{
+  flex:1; padding:8px; border-radius:9px; border:1px solid rgba(55,53,47,0.12);
+  background:#fff; color:var(--medium); font-family:inherit; font-weight:700; font-size:12.5px; cursor:pointer;
+}
+.cloud-tab-row button.active{ background:var(--lavender); color:#fff; border-color:var(--lavender); }
+.share-banner{
+  background:var(--light-lavender-hover); color:var(--lavender); text-align:center;
+  font-size:12.5px; font-weight:700; padding:9px 16px;
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="eyebrow">Course Journal <span class="byline">by Hanne</span></div>
+    <h1>學習紀錄</h1>
+    <div class="header-sub">記下每一堂課的進度，今天也溫柔地學一點點。</div>
+    <div class="backup-bar">
+      <button id="cloudSyncBtn">☁ 雲端同步</button>
+      <button id="exportBtn">⬇ 匯出備份</button>
+      <button id="importBtn">⬆ 匯入備份</button>
+      <input type="file" id="importFile" accept="application/json">
+    </div>
+  </div>
+</header>
+
+<div class="share-banner" id="shareBanner" style="display:none;">👀 唯讀分享檢視 — 你正在檢視別人分享的課程進度，無法編輯</div>
+
+<nav id="navBar">
+  <button data-page="dashboard" class="active">總覽儀表板</button>
+  <button data-page="schedule">今日排程</button>
+  <button data-page="list">課程清單</button>
+  <button data-page="progress">課程進度</button>
+</nav>
+
+<main>
+
+  <!-- Dashboard -->
+  <section class="page active" id="page-dashboard">
+    <div class="stat-grid" id="statGrid"></div>
+
+    <div class="section-title">整體進度總覽（依每堂課實際進度精密計算）</div>
+    <div class="pie-panel" id="piePanel"></div>
+    <div class="doing-detail" id="doingDetail"></div>
+
+    <div class="section-title">🔥 優先完成課程（進度達 60%）<span class="count-badge" id="priorityCount">0</span></div>
+    <div id="priorityContainer"></div>
+
+    <div class="section-title">即將到期</div>
+    <div id="dashboardSoon"></div>
+  </section>
+
+  <!-- Schedule -->
+  <section class="page" id="page-schedule">
+    <div class="cal-header">
+      <div class="cal-title" id="calTitle"></div>
+      <div class="cal-nav">
+        <button id="calPrev">‹</button>
+        <button id="calNext">›</button>
+      </div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-daylist" id="calDayList"></div>
+
+    <div class="section-title">✦ 今天推薦優先學習</div>
+    <div class="today-panel" id="todayPanel"></div>
+  </section>
+
+  <!-- List -->
+  <section class="page" id="page-list">
+    <div class="section-title">課程類型</div>
+    <div class="pie-panel" id="tagPiePanel"></div>
+
+    <div class="toolbar">
+      <input type="text" class="search-box" id="searchInput" placeholder="搜尋課程名稱…">
+      <select class="filter-select" id="statusFilter">
+        <option value="all">全部狀態</option>
+        <option value="todo">未開始</option>
+        <option value="doing">進行中</option>
+        <option value="done">已完成</option>
+      </select>
+      <select class="filter-select" id="sortSelect">
+        <option value="due">依到期日排序</option>
+        <option value="progress">依進度排序</option>
+        <option value="name">依名稱排序</option>
+      </select>
+    </div>
+    <div id="listContainer"></div>
+  </section>
+
+  <!-- Progress -->
+  <section class="page" id="page-progress">
+    <div class="section-title">進行中 <span class="count-badge" id="progDoingCount">0</span></div>
+    <div id="progDoing"></div>
+    <div class="section-title">尚未開始 <span class="count-badge" id="progTodoCount">0</span></div>
+    <div id="progTodo"></div>
+    <div class="section-title">已完成 <span class="count-badge" id="progDoneCount">0</span></div>
+    <div id="progDone"></div>
+  </section>
+
+</main>
+
+<button class="fab" id="fabAdd" title="新增課程">＋</button>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2 id="modalTitle">新增課程</h2>
+    <form id="courseForm">
+      <input type="hidden" id="courseId">
+      <div class="field">
+        <label for="courseName">課程名 *</label>
+        <input type="text" id="courseName" required placeholder="例如：進階塔羅牌陣解讀">
+      </div>
+      <div class="field">
+        <label for="courseAlias">代稱（選填，用於日期排程等空間較小處顯示）</label>
+        <input type="text" id="courseAlias" placeholder="例如：塔羅進階">
+      </div>
+      <div class="field">
+        <label>標籤（可新增多筆，可拖曳排序）</label>
+        <div class="tag-list" id="tagList"></div>
+        <div class="tag-add-row">
+          <select id="tagExistingSelect"><option value="">選擇已有標籤...</option></select>
+          <input type="text" id="tagNewInput" placeholder="或輸入新標籤名稱">
+          <button type="button" id="addTagBtn">新增標籤</button>
+        </div>
+        <button type="button" id="tagManageBtn" class="tag-manage-link">✎ 管理標籤庫</button>
+        <div class="tag-manage-list" id="tagManageList" style="display:none;"></div>
+      </div>
+      <div class="field">
+        <label for="startDate">開始上課日期</label>
+        <input type="date" id="startDate">
+      </div>
+      <div class="field">
+        <label for="dueDate">到期日</label>
+        <input type="date" id="dueDate">
+      </div>
+      <div class="field">
+        <label for="courseDuration">總課程時長（選填）</label>
+        <input type="text" id="courseDuration" placeholder="例如：12 小時">
+      </div>
+      <div class="field">
+        <label for="progressRange">課程進度<span id="progressModeHint" class="field-hint" style="display:none;">（已切換為由章節自動計算，滑桿已停用）</span></label>
+        <input type="range" id="progressRange" min="0" max="100" value="0">
+        <div class="range-value"><span id="progressLabel">0</span>%</div>
+      </div>
+      <div class="field">
+        <label>課程章節</label>
+        <div class="checklist-box">
+          <div class="checklist-bulk">
+            <textarea id="bulkItemInput" placeholder="填入課程大綱"></textarea>
+            <div class="checklist-bulk-row">
+              <button type="button" id="bulkAddBtn">課程項目新增</button>
+            </div>
+          </div>
+          <div class="checklist-divider">或單筆新增</div>
+          <div class="checklist-add-row">
+            <select id="itemTypeSelect">
+              <option value="item">子項目（可勾選）</option>
+              <option value="header">大標題（不可勾選）</option>
+            </select>
+            <input type="text" id="itemInput" placeholder="例如：1-1 創業路徑：從零到營收破 10 億">
+            <button type="button" id="addItemBtn">新增</button>
+          </div>
+          <div class="checklist-items" id="checklistItems"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>學習時間（可新增多筆）</label>
+        <div class="schedule-box">
+          <div class="schedule-add-row">
+            <select id="scheduleType">
+              <option value="weekly">每週固定時間</option>
+              <option value="single">單日時間</option>
+              <option value="range">區間時間</option>
+            </select>
+            <span id="scheduleWeeklyFields" style="display:contents;">
+              <select id="scheduleWeekday">
+                <option value="0">週日</option>
+                <option value="1">週一</option>
+                <option value="2">週二</option>
+                <option value="3">週三</option>
+                <option value="4" selected>週四</option>
+                <option value="5">週五</option>
+                <option value="6">週六</option>
+              </select>
+            </span>
+            <span id="scheduleSingleFields" style="display:none;">
+              <input type="date" id="scheduleSingleDate">
+            </span>
+            <span id="scheduleRangeFields" style="display:none;">
+              <input type="date" id="scheduleRangeStart">
+              <span class="schedule-range-sep">～</span>
+              <input type="date" id="scheduleRangeEnd">
+            </span>
+            <input type="time" id="scheduleTime" value="20:00">
+            <button type="button" id="addScheduleBtn">新增排程</button>
+          </div>
+          <div class="schedule-list" id="scheduleList"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="courseLoginUrl">登入網址</label>
+        <input type="text" id="courseLoginUrl" placeholder="例如：https://school.example.com/login">
+      </div>
+      <div class="field">
+        <label for="courseNote">備註欄位</label>
+        <input type="text" id="courseNote" placeholder="例如：老師會提前 5 分鐘開放進入教室">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="cancelBtn">取消</button>
+        <button type="submit" class="btn btn-primary">儲存課程</button>
+      </div>
+      <div class="modal-actions" id="deleteRow" style="display:none;">
+        <button type="button" class="btn btn-danger" id="deleteBtn">刪除這堂課</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Cloud Sync Modal -->
+<div class="modal-overlay" id="cloudModalOverlay">
+  <div class="modal">
+    <h2>☁️ 雲端同步設定</h2>
+
+    <div id="cloudStep1">
+      <p class="field-hint" style="margin-bottom:14px; line-height:1.6;">
+        要跨裝置同步，需要接一個免費的 Supabase 雲端資料庫（你自己的帳號，個人用量完全在免費額度內）。設定步驟：<br><br>
+        1. 到 <a href="https://supabase.com" target="_blank" rel="noopener" style="color:var(--blue);">supabase.com</a> 免費註冊，建立一個新專案<br>
+        2. 進專案的 SQL Editor，貼上以下指令執行一次（建立資料表＋權限規則）：
+      </p>
+      <pre style="background:var(--cream); border-radius:10px; padding:10px; font-size:10.5px; overflow-x:auto; white-space:pre-wrap; margin-bottom:14px;">create table app_state (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  data jsonb not null default '{}'::jsonb,
+  share_token uuid,
+  share_enabled boolean not null default false,
+  updated_at timestamptz not null default now()
+);
+alter table app_state enable row level security;
+create policy "select own" on app_state for select using (auth.uid() = user_id);
+create policy "insert own" on app_state for insert with check (auth.uid() = user_id);
+create policy "update own" on app_state for update using (auth.uid() = user_id);
+
+create or replace function get_shared_state(p_token uuid)
+returns jsonb
+language sql
+security definer
+set search_path = public
+as $$
+  select data from app_state
+  where share_token = p_token and share_enabled = true
+  limit 1;
+$$;
+grant execute on function get_shared_state(uuid) to anon;</pre>
+      <p class="field-hint" style="margin-bottom:14px;">
+        如果你之前已經建立過 <code>app_state</code> 資料表（還沒有分享功能），改執行這段補上分享功能就好，不用整張表重建：
+      </p>
+      <pre style="background:var(--cream); border-radius:10px; padding:10px; font-size:10.5px; overflow-x:auto; white-space:pre-wrap; margin-bottom:14px;">alter table app_state add column if not exists share_token uuid;
+alter table app_state add column if not exists share_enabled boolean not null default false;
+
+create or replace function get_shared_state(p_token uuid)
+returns jsonb
+language sql
+security definer
+set search_path = public
+as $$
+  select data from app_state
+  where share_token = p_token and share_enabled = true
+  limit 1;
+$$;
+grant execute on function get_shared_state(uuid) to anon;</pre>
+      <p class="field-hint" style="margin-bottom:14px;">
+        3. 到專案設定的 API 頁面，複製 Project URL 和 anon public key，貼在下面：
+      </p>
+      <div class="field">
+        <label for="cloudUrlInput">Supabase Project URL</label>
+        <input type="text" id="cloudUrlInput" placeholder="https://xxxxx.supabase.co">
+      </div>
+      <div class="field">
+        <label for="cloudAnonInput">Supabase anon public key</label>
+        <input type="text" id="cloudAnonInput" placeholder="eyJhbGciOi...">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="cloudCloseBtn1">關閉</button>
+        <button type="button" class="btn btn-primary" id="cloudSaveConfigBtn">儲存並繼續</button>
+      </div>
+    </div>
+
+    <div id="cloudStep2" style="display:none;">
+      <div class="cloud-status" id="cloudStatusLine"></div>
+      <div class="cloud-reminder">⚠️ 登入信箱後，異動才會同步到雲端；未登入僅存於本機瀏覽器。</div>
+
+      <div id="cloudLoggedOutView">
+        <div class="cloud-tab-row">
+          <button type="button" class="active" id="cloudTabMagic">免密碼登入</button>
+          <button type="button" id="cloudTabSignIn">密碼登入</button>
+          <button type="button" id="cloudTabSignUp">註冊新帳號</button>
+        </div>
+        <div class="field">
+          <label for="cloudEmailInput">Email</label>
+          <input type="text" id="cloudEmailInput" placeholder="you@example.com">
+        </div>
+        <div class="field" id="cloudPasswordField" style="display:none;">
+          <label for="cloudPasswordInput">密碼</label>
+          <input type="password" id="cloudPasswordInput" placeholder="至少 6 碼">
+        </div>
+        <button type="button" id="forgotPasswordBtn" class="tag-manage-link" style="display:none;">忘記密碼？</button>
+        <p class="field-hint" id="cloudMagicHint" style="margin-bottom:10px;">
+          寄送連結到信箱，點擊即完成登入（首次使用會自動建立帳號）。<br>
+          已有密碼帳號者，請改用「密碼登入」的「忘記密碼？」。
+        </p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-primary" id="cloudAuthSubmitBtn">寄送登入連結</button>
+        </div>
+      </div>
+
+      <div id="cloudRecoveryView" style="display:none;">
+        <p class="field-hint" style="margin-bottom:14px;">請輸入你要設定的新密碼。</p>
+        <div class="field">
+          <label for="cloudNewPasswordInput">新密碼</label>
+          <input type="password" id="cloudNewPasswordInput" placeholder="至少 6 碼">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-primary" id="cloudRecoverySubmitBtn">更新密碼</button>
+        </div>
+      </div>
+
+      <div id="cloudLoggedInView" style="display:none;">
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cloudManualSyncBtn">立即同步</button>
+          <button type="button" class="btn btn-primary" id="cloudSignOutBtn">登出</button>
+        </div>
+
+        <div class="field" style="margin-top:10px;">
+          <label>唯讀分享連結</label>
+          <p class="field-hint" style="margin-bottom:10px;">開啟後會產生一個連結，任何拿到連結的人都能「檢視」你目前的課程進度，但無法新增、編輯或刪除。不需要告訴對方你的帳號密碼。</p>
+          <div class="modal-actions" style="margin-top:0;">
+            <button type="button" class="btn btn-secondary" id="shareToggleBtn">啟用分享連結</button>
+          </div>
+          <div id="shareLinkBox" style="display:none; margin-top:10px;">
+            <input type="text" id="shareLinkInput" readonly style="width:100%; padding:9px 11px; border:1px solid rgba(55,53,47,0.12); border-radius:9px; font-family:inherit; font-size:12px; background:var(--cream); color:var(--medium);">
+            <div class="modal-actions">
+              <button type="button" class="btn btn-secondary" id="shareCopyBtn">複製連結</button>
+              <button type="button" class="btn btn-secondary" id="shareRegenBtn">重新產生連結</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="cloudCloseBtn2">關閉</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'course_journal_v1';
+let courses = [];
+let editingId = null;
+const WEEKDAY_NAMES = ['週日','週一','週二','週三','週四','週五','週六'];
+function formatDateShort(dateStr){
+  if(!dateStr) return '';
+  const parts = dateStr.split('-');
+  if(parts.length !== 3) return dateStr;
+  return `${parseInt(parts[1],10)}/${parseInt(parts[2],10)}`;
+}
+function formatSchedule(s){
+  if(s.type === 'single'){
+    return `🗓 ${formatDateShort(s.date)} ${s.time}`;
+  }
+  if(s.type === 'range'){
+    return `🗓 ${formatDateShort(s.startDate)}～${formatDateShort(s.endDate)} ${s.time}`;
+  }
+  // default / 'weekly'
+  return `🗓 每${WEEKDAY_NAMES[s.weekday]} ${s.time}`;
+}
+function scheduleOccursOn(s, dateStr, weekday){
+  if(s.type === 'single') return s.date === dateStr;
+  if(s.type === 'range') return dateStr >= s.startDate && dateStr <= s.endDate;
+  return s.weekday === weekday; // 'weekly' (also backward-compatible default)
+}
+function displayName(c){
+  return (c.alias && c.alias.trim()) ? c.alias.trim() : c.name;
+}
+
+// ---------- Data ----------
+function loadCourses(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    courses = raw ? JSON.parse(raw) : [];
+  }catch(e){ courses = []; }
+}
+function saveCourses(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(courses));
+  triggerCloudPush();
+}
+function uid(){ return 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2,8); }
+
+const TAGS_STORAGE_KEY = 'course_journal_tags_v1';
+let allTags = [];
+function loadAllTags(){
+  try{
+    const raw = localStorage.getItem(TAGS_STORAGE_KEY);
+    allTags = raw ? JSON.parse(raw) : ['工具','玄學技能','語言','商業'];
+  }catch(e){ allTags = ['工具','玄學技能','語言','商業']; }
+}
+function saveAllTags(){
+  localStorage.setItem(TAGS_STORAGE_KEY, JSON.stringify(allTags));
+  triggerCloudPush();
+}
+
+// ---- Tag colors: each tag gets a persistent, unique hue (never reused by another tag) ----
+const TAG_COLOR_MAP_KEY = 'course_journal_tag_color_map_v1';
+const TAG_COLOR_NEXT_KEY = 'course_journal_tag_color_next_v1';
+let tagColorMap = {};
+let nextTagColorIndex = 0;
+function loadTagColors(){
+  try{
+    tagColorMap = JSON.parse(localStorage.getItem(TAG_COLOR_MAP_KEY) || '{}');
+  }catch(e){ tagColorMap = {}; }
+  nextTagColorIndex = parseInt(localStorage.getItem(TAG_COLOR_NEXT_KEY) || '0', 10) || 0;
+}
+function saveTagColors(){
+  localStorage.setItem(TAG_COLOR_MAP_KEY, JSON.stringify(tagColorMap));
+  localStorage.setItem(TAG_COLOR_NEXT_KEY, String(nextTagColorIndex));
+  triggerCloudPush();
+}
+function getTagColorIndex(tag){
+  if(tagColorMap[tag] === undefined){
+    tagColorMap[tag] = nextTagColorIndex;
+    nextTagColorIndex += 1;
+    saveTagColors();
+  }
+  return tagColorMap[tag];
+}
+function renameTagColor(oldTag, newTag){
+  if(tagColorMap[oldTag] !== undefined && tagColorMap[newTag] === undefined){
+    tagColorMap[newTag] = tagColorMap[oldTag];
+  }
+  delete tagColorMap[oldTag];
+  saveTagColors();
+}
+function deleteTagColor(tag){
+  delete tagColorMap[tag];
+  saveTagColors();
+}
+function tagColor(tag){
+  const idx = getTagColorIndex(tag);
+  // golden-angle hue rotation keeps every index visually distinct even as tag count grows
+  const hue = (idx * 137.508) % 360;
+  return {
+    fg: `hsl(${hue.toFixed(1)}, 32%, 42%)`,
+    bg: `hsl(${hue.toFixed(1)}, 45%, 94%)`
+  };
+}
+
+function daysUntil(dateStr){
+  if(!dateStr) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(dateStr); d.setHours(0,0,0,0);
+  return Math.round((d - today) / 86400000);
+}
+function statusOf(course){
+  if(course.progress >= 100) return 'done';
+  if(course.progress > 0) return 'doing';
+  return 'todo';
+}
+function statusLabel(s){
+  return {todo:'未開始', doing:'進行中', done:'已完成'}[s];
+}
+function daysSince(dateStr){
+  if(!dateStr) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(dateStr); d.setHours(0,0,0,0);
+  return Math.round((today - d) / 86400000);
+}
+function isStalled(c){
+  if(statusOf(c) === 'done') return false;
+  const ref = c.lastActivity || c.startDate;
+  if(!ref) return false;
+  const days = daysSince(ref);
+  return days !== null && days >= 7;
+}
+function linkifyNote(note){
+  const escaped = escapeHTML(note);
+  const urlPattern = /((https?:\/\/|www\.)[^\s]+)/gi;
+  return escaped.replace(urlPattern, (match)=>{
+    const href = match.startsWith('http') ? match : 'https://' + match;
+    return `<a href="${href}" target="_blank" rel="noopener">${match}</a>`;
+  });
+}
+function computeProgressFromItems(items){
+  const children = (items || []).filter(i => i.type !== 'header');
+  if(children.length === 0) return null;
+  const done = children.filter(i=>i.done).length;
+  return Math.round((done / children.length) * 100);
+}
+
+// ---------- Toast ----------
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+// ---------- Nav ----------
+document.getElementById('navBar').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button[data-page]');
+  if(!btn) return;
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-' + btn.dataset.page).classList.add('active');
+  renderAll();
+});
+
+// ---------- Rendering ----------
+function courseCardHTML(c){
+  const s = statusOf(c);
+  const days = daysUntil(c.dueDate);
+  let dueHTML = '';
+  if(c.dueDate){
+    if(s !== 'done' && days !== null && days < 0){
+      dueHTML = `<span class="due-badge due-overdue">已逾期 ${Math.abs(days)} 天</span>`;
+    } else if(s !== 'done' && days !== null && days <= 7){
+      dueHTML = `<span class="due-badge due-soon">⏰ ${days === 0 ? '今天到期' : days + ' 天後到期'}</span>`;
+    } else {
+      dueHTML = `<span class="due-badge due-normal">到期日 ${c.dueDate}</span>`;
+    }
+  } else {
+    dueHTML = `<span class="due-badge due-normal">未設定到期日</span>`;
+  }
+  const overdue = s !== 'done' && days !== null && days < 0;
+  const tagClass = overdue ? 'status-overdue' : ('status-' + s);
+  const tagText = overdue ? '已逾期' : statusLabel(s);
+  const stalled = isStalled(c);
+  const stalledDays = stalled ? daysSince(c.lastActivity || c.startDate) : null;
+  const noteHTML = c.note ? `<div class="course-note">📝 ${linkifyNote(c.note)}</div>` : '';
+  const loginHTML = c.loginUrl ? `<div class="course-login">🔗 ${linkifyNote(c.loginUrl)}</div>` : '';
+  const scheduleBadges = (c.recurring || []).map(s => `<span class="recurring-badge">${formatSchedule(s)}</span>`).join('');
+  const childItems = (c.items || []).filter(i => i.type !== 'header');
+  const hasItems = childItems.length > 0;
+  const itemsDoneCount = hasItems ? childItems.filter(i=>i.done).length : 0;
+  const checklistBadge = hasItems ? `<span class="checklist-mini">☑ ${itemsDoneCount}/${childItems.length} 完成</span>` : '';
+  const tagBadges = (c.tags || []).map(t => {
+    const color = tagColor(t);
+    return `<span class="tag-badge" style="background:${color.bg}; color:${color.fg};">${escapeHTML(t)}</span>`;
+  }).join('');
+  const durationBadge = c.duration ? `<span class="duration-badge">⏱ ${escapeHTML(c.duration)}</span>` : '';
+
+  return `
+  <div class="course-card" data-id="${c.id}">
+    <div class="course-top">
+      <div>
+        <div class="course-name">${escapeHTML(c.name)}</div>
+        <div class="course-meta">${c.startDate ? '開始於 ' + c.startDate : '尚未排定開始日'}</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+        ${durationBadge}
+        <span class="status-tag ${tagClass}">${tagText}</span>
+      </div>
+    </div>
+    ${tagBadges ? `<div class="progress-row" style="flex-wrap:wrap; gap:6px;">${tagBadges}</div>` : ''}
+    <div class="progress-row">
+      <div class="progress-track"><div class="progress-fill" style="width:${c.progress}%"></div></div>
+      <div class="progress-pct">${c.progress}%</div>
+    </div>
+    <div class="progress-row" style="flex-wrap:wrap; gap:8px;">
+      ${dueHTML}
+      ${stalled ? `<span class="stalled-badge">⚠ ${stalledDays} 天沒有動作</span>` : ''}
+      ${checklistBadge}
+      ${scheduleBadges}
+    </div>
+    ${noteHTML}
+    ${loginHTML}
+  </div>`;
+}
+
+function escapeHTML(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function attachCardClicks(container){
+  container.querySelectorAll('.course-card').forEach(card=>{
+    card.addEventListener('click', ()=> openModal(card.dataset.id));
+  });
+}
+
+function renderDashboard(){
+  const total = courses.length;
+  const done = courses.filter(c=>statusOf(c)==='done').length;
+  const doing = courses.filter(c=>statusOf(c)==='doing').length;
+  const soon = courses.filter(c=>{
+    const s = statusOf(c);
+    if(s==='done' || !c.dueDate) return false;
+    const d = daysUntil(c.dueDate);
+    return d !== null && d <= 7;
+  }).length;
+  const completionRate = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  document.getElementById('statGrid').innerHTML = `
+    <div class="stat-card blue"><div class="num">${total}</div><div class="label">總課程數</div></div>
+    <div class="stat-card sage"><div class="num">${done}</div><div class="label">已完成</div></div>
+    <div class="stat-card sage"><div class="num">${completionRate}%</div><div class="label">完課率</div></div>
+    <div class="stat-card warn"><div class="num">${soon}</div><div class="label">7 天內到期</div></div>
+  `;
+
+  const soonList = courses.filter(c=>{
+    const s = statusOf(c);
+    if(s==='done' || !c.dueDate) return false;
+    const d = daysUntil(c.dueDate);
+    return d !== null && d <= 7;
+  }).sort((a,b)=>daysUntil(a.dueDate)-daysUntil(b.dueDate));
+
+  const dashSoon = document.getElementById('dashboardSoon');
+  if(soonList.length === 0){
+    dashSoon.innerHTML = `<div class="empty-state"><span class="glyph">☕</span><p>近期沒有即將到期的課程，很安心。</p></div>`;
+  } else {
+    dashSoon.innerHTML = soonList.map(courseCardHTML).join('');
+    attachCardClicks(dashSoon);
+  }
+
+  renderPieChart(total, done, doing, total - done - doing);
+  renderPriority();
+}
+
+function renderPriority(){
+  const priority = courses
+    .filter(c => statusOf(c) !== 'done' && c.progress >= 60)
+    .sort((a,b) => b.progress - a.progress);
+
+  document.getElementById('priorityCount').textContent = priority.length;
+  const container = document.getElementById('priorityContainer');
+  if(priority.length === 0){
+    container.innerHTML = `<div class="empty-state"><span class="glyph">🎯</span><p>目前沒有進度達 60% 的課程，快完成的課會自動出現在這裡。</p></div>`;
+  } else {
+    container.innerHTML = priority.map(courseCardHTML).join('');
+    attachCardClicks(container);
+  }
+}
+
+function renderPieChart(total, done, doing, todo){
+  const panel = document.getElementById('piePanel');
+  if(total === 0){
+    panel.innerHTML = `<div class="pie-empty">還沒有課程資料，新增課程後這裡會顯示整體進度圖。</div>`;
+    document.getElementById('doingDetail').innerHTML = '';
+    return;
+  }
+  // 精密計算：已完成課程算 100%，進行中課程採用每堂課實際的進度百分比，未開始算 0%
+  const totalProgressSum = courses.reduce((sum,c)=>sum + c.progress, 0);
+  const overallPct = Math.round(totalProgressSum / total);
+
+  const doingCourses = courses.filter(c=>statusOf(c)==='doing');
+  const doingAvg = doingCourses.length > 0
+    ? Math.round(doingCourses.reduce((sum,c)=>sum + c.progress, 0) / doingCourses.length)
+    : 0;
+
+  const gradient = `conic-gradient(var(--pink) 0% ${overallPct}%, var(--light-blue) ${overallPct}% 100%)`;
+
+  panel.innerHTML = `
+    <div class="pie-chart-wrap">
+      <div class="pie-chart" style="background:${gradient};"></div>
+      <div class="pie-center">
+        <div class="pie-center-num">${overallPct}%</div>
+        <div class="pie-center-label">整體完成度</div>
+      </div>
+    </div>
+    <div class="pie-legend">
+      <div class="pie-legend-item"><span class="pie-legend-dot" style="background:var(--sage);"></span>已完成 <b>${done}</b> 堂</div>
+      <div class="pie-legend-item"><span class="pie-legend-dot" style="background:var(--pink);"></span>進行中 <b>${doing}</b> 堂・平均進度 <b>${doingAvg}%</b></div>
+      <div class="pie-legend-item"><span class="pie-legend-dot" style="background:var(--soft-blue);"></span>未開始 <b>${todo}</b> 堂</div>
+    </div>
+  `;
+
+  const detailEl = document.getElementById('doingDetail');
+  if(courses.length === 0){
+    detailEl.innerHTML = '';
+  } else {
+    const sorted = [...courses].sort((a,b)=>b.progress - a.progress);
+    detailEl.innerHTML = `
+      <div class="doing-detail-title">所有課程進度</div>
+      ${sorted.map(c => `
+        <div class="doing-detail-row">
+          <span class="ddr-name">${escapeHTML(c.name)}</span>
+          <div class="ddr-track"><div class="ddr-fill" style="width:${c.progress}%"></div></div>
+          <span class="ddr-pct">${c.progress}%</span>
+        </div>
+      `).join('')}
+    `;
+  }
+}
+
+// ---------- Schedule (calendar + auto pick) ----------
+let calYear, calMonth; // 0-indexed month
+function initCalIfNeeded(){
+  if(calYear === undefined){
+    const now = new Date();
+    calYear = now.getFullYear();
+    calMonth = now.getMonth();
+  }
+}
+function ymd(y,m,d){
+  return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+function renderSchedule(){
+  initCalIfNeeded();
+  const dowNames = ['日','一','二','三','四','五','六'];
+  const first = new Date(calYear, calMonth, 1);
+  const startWeekday = first.getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const todayStr = new Date().toISOString().slice(0,10);
+  const todayWeekday = new Date().getDay();
+
+  const dueMap = {}; // dateStr -> [courses]
+  courses.forEach(c=>{
+    if(c.dueDate && statusOf(c) !== 'done'){
+      (dueMap[c.dueDate] = dueMap[c.dueDate] || []).push(c);
+    }
+  });
+  const recurMap = {}; // dateStr -> [{course, schedule}]
+  for(let d=1; d<=daysInMonth; d++){
+    const weekday = new Date(calYear, calMonth, d).getDay();
+    const dateStr = ymd(calYear, calMonth, d);
+    courses.forEach(c=>{
+      (c.recurring || []).forEach(s=>{
+        if(scheduleOccursOn(s, dateStr, weekday)){
+          (recurMap[dateStr] = recurMap[dateStr] || []).push({course:c, schedule:s});
+        }
+      });
+    });
+  }
+
+  document.getElementById('calTitle').textContent = `${calYear} 年 ${calMonth + 1} 月`;
+
+  let html = dowNames.map(n=>`<div class="cal-dow">${n}</div>`).join('');
+  for(let i=0;i<startWeekday;i++) html += `<div class="cal-cell empty"></div>`;
+  for(let d=1; d<=daysInMonth; d++){
+    const dateStr = ymd(calYear, calMonth, d);
+    const isToday = dateStr === todayStr;
+    const dueList = dueMap[dateStr] || [];
+    const recurList = recurMap[dateStr] || [];
+    const hasDue = dueList.length > 0;
+    const hasRecur = recurList.length > 0;
+    let cls = 'cal-cell';
+    if(isToday) cls += ' today';
+    if(hasDue) cls += ' has-due';
+    if(hasRecur) cls += ' has-recur';
+
+    // Build up to 3 name tags: recurring courses first, then due courses (dedupe by course id)
+    const seen = new Set();
+    const tags = [];
+    recurList.forEach(r => { if(!seen.has(r.course.id)){ seen.add(r.course.id); tags.push(displayName(r.course)); } });
+    dueList.forEach(c => { if(!seen.has(c.id)){ seen.add(c.id); tags.push(displayName(c)); } });
+    const shown = tags.slice(0,2);
+    const extra = tags.length - shown.length;
+    const namesHTML = tags.length ? `
+      <div class="cal-names">
+        ${shown.map(n => `<span class="cal-name-tag">${escapeHTML(n)}</span>`).join('')}
+        ${extra > 0 ? `<span class="cal-name-more">+${extra}</span>` : ''}
+      </div>` : '';
+
+    html += `<div class="${cls}" data-date="${dateStr}"><span class="cal-daynum">${d}</span>${namesHTML}</div>`;
+  }
+  document.getElementById('calGrid').innerHTML = html;
+
+  document.querySelectorAll('.cal-cell.has-due, .cal-cell.has-recur').forEach(cell=>{
+    cell.addEventListener('click', ()=>{
+      const date = cell.dataset.date;
+      const dueList = dueMap[date] || [];
+      const recurList = recurMap[date] || [];
+      const dayListEl = document.getElementById('calDayList');
+      let out = '';
+      if(recurList.length){
+        out += `<div class="section-title">${date} 固定上課</div>` +
+          recurList.map(r => courseCardHTML(r.course)).join('');
+      }
+      if(dueList.length){
+        out += `<div class="section-title">${date} 到期課程</div>` +
+          dueList.map(courseCardHTML).join('');
+      }
+      dayListEl.innerHTML = out;
+      attachCardClicks(dayListEl);
+    });
+  });
+
+  // Today panel: auto-schedule — today's recurring classes first, then stalled, then nearest deadline
+  const todayRecurIds = new Set(
+    courses.filter(c => (c.recurring || []).some(s => scheduleOccursOn(s, todayStr, todayWeekday))).map(c=>c.id)
+  );
+  const todayPicks = courses
+    .filter(c=>statusOf(c)!=='done')
+    .sort((a,b)=>{
+      const ra = todayRecurIds.has(a.id) ? 0 : 1;
+      const rb = todayRecurIds.has(b.id) ? 0 : 1;
+      if(ra !== rb) return ra - rb;
+      const sa = isStalled(a) ? 0 : 1;
+      const sb = isStalled(b) ? 0 : 1;
+      if(sa !== sb) return sa - sb;
+      const da = a.dueDate ? daysUntil(a.dueDate) : 9999;
+      const db = b.dueDate ? daysUntil(b.dueDate) : 9999;
+      return da - db;
+    })
+    .slice(0,5);
+
+  const todayPanel = document.getElementById('todayPanel');
+  if(todayPicks.length === 0){
+    todayPanel.innerHTML = `<div class="today-empty"><span class="glyph">🌙</span>目前沒有待學課程，新增一堂課開始今天的學習吧。</div>`;
+  } else {
+    todayPanel.innerHTML = todayPicks.map(courseCardHTML).join('');
+    attachCardClicks(todayPanel);
+  }
+}
+document.getElementById('calPrev').addEventListener('click', ()=>{
+  initCalIfNeeded();
+  calMonth--; if(calMonth < 0){ calMonth = 11; calYear--; }
+  renderSchedule();
+});
+document.getElementById('calNext').addEventListener('click', ()=>{
+  initCalIfNeeded();
+  calMonth++; if(calMonth > 11){ calMonth = 0; calYear++; }
+  renderSchedule();
+});
+
+function renderTagPieChart(){
+  const panel = document.getElementById('tagPiePanel');
+  if(courses.length === 0){
+    panel.innerHTML = `<div class="pie-empty">還沒有課程資料，新增課程後這裡會顯示標籤分布。</div>`;
+    return;
+  }
+
+  const tagCounts = {};
+  let untaggedCount = 0;
+  courses.forEach(c=>{
+    if(c.tags && c.tags.length > 0){
+      c.tags.forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; });
+    } else {
+      untaggedCount++;
+    }
+  });
+
+  const entries = Object.keys(tagCounts)
+    .map(t => ({ label: t, count: tagCounts[t], color: tagColor(t).bg }))
+    .sort((a,b) => b.count - a.count);
+  if(untaggedCount > 0){
+    entries.push({ label: '未分類', count: untaggedCount, color: 'var(--light-tan)' });
+  }
+
+  const total = entries.reduce((sum,e)=>sum + e.count, 0);
+  if(total === 0){
+    panel.innerHTML = `<div class="pie-empty">還沒有課程資料，新增課程後這裡會顯示標籤分布。</div>`;
+    return;
+  }
+
+  let cursor = 0;
+  const stops = entries.map(e=>{
+    const start = cursor;
+    const pct = (e.count / total) * 100;
+    cursor += pct;
+    return `${e.color} ${start}% ${cursor}%`;
+  });
+  const gradient = `conic-gradient(${stops.join(', ')})`;
+
+  panel.innerHTML = `
+    <div class="pie-chart-wrap">
+      <div class="pie-chart" style="background:${gradient};"></div>
+      <div class="pie-center">
+        <div class="pie-center-num">${entries.length}</div>
+        <div class="pie-center-label">個標籤</div>
+      </div>
+    </div>
+    <div class="pie-legend">
+      ${entries.map(e => `
+        <div class="pie-legend-item">
+          <span class="pie-legend-dot" style="background:${e.color};"></span>
+          ${escapeHTML(e.label)} <b>${e.count}</b> 堂・${Math.round((e.count/total)*100)}%
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderList(){
+  renderTagPieChart();
+  const q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+  const statusF = document.getElementById('statusFilter').value;
+  const sortBy = document.getElementById('sortSelect').value;
+
+  let filtered = courses.filter(c=>{
+    const matchQ = c.name.toLowerCase().includes(q);
+    const matchS = statusF === 'all' || statusOf(c) === statusF;
+    return matchQ && matchS;
+  });
+
+  filtered.sort((a,b)=>{
+    if(sortBy === 'progress') return b.progress - a.progress;
+    if(sortBy === 'name') return a.name.localeCompare(b.name, 'zh-Hant');
+    const da = a.dueDate ? daysUntil(a.dueDate) : 9999;
+    const db = b.dueDate ? daysUntil(b.dueDate) : 9999;
+    return da - db;
+  });
+
+  const container = document.getElementById('listContainer');
+  if(filtered.length === 0){
+    container.innerHTML = `<div class="empty-state"><span class="glyph">🔍</span><p>找不到符合條件的課程。</p></div>`;
+  } else {
+    container.innerHTML = filtered.map(courseCardHTML).join('');
+    attachCardClicks(container);
+  }
+}
+
+const expandedProgressIds = new Set();
+
+function progressItemHTML(c){
+  const isExpanded = expandedProgressIds.has(c.id);
+  const s = statusOf(c);
+  const tagText = statusLabel(s);
+  const tagClass = 'status-' + s;
+  const childItems = (c.items || []).filter(i => i.type !== 'header');
+  const hasItems = childItems.length > 0;
+
+  const days = daysUntil(c.dueDate);
+  let dueHTML = '';
+  if(c.dueDate){
+    if(s !== 'done' && days !== null && days < 0){
+      dueHTML = `<span class="due-badge due-overdue">已逾期 ${Math.abs(days)} 天</span>`;
+    } else if(s !== 'done' && days !== null && days <= 7){
+      dueHTML = `<span class="due-badge due-soon">⏰ ${days === 0 ? '今天到期' : days + ' 天後到期'}</span>`;
+    } else {
+      dueHTML = `<span class="due-badge due-normal">到期日 ${c.dueDate}</span>`;
+    }
+  }
+  const stalled = isStalled(c);
+  const stalledDays = stalled ? daysSince(c.lastActivity || c.startDate) : null;
+  const scheduleBadges = (c.recurring || []).map(sc => `<span class="recurring-badge">${formatSchedule(sc)}</span>`).join('');
+  const tagBadges = (c.tags || []).map(t => {
+    const color = tagColor(t);
+    return `<span class="tag-badge" style="background:${color.bg}; color:${color.fg};">${escapeHTML(t)}</span>`;
+  }).join('');
+
+  const checklistHTML = (c.items || []).map(item => {
+    const isHeader = item.type === 'header';
+    const rowClass = isHeader ? 'header-row' : 'child-row' + (item.done ? ' checked' : '');
+    const checkbox = isHeader ? '' : `<input type="checkbox" data-course-id="${c.id}" data-item-id="${item.id}" ${item.done ? 'checked' : ''} ${isShareView ? 'disabled' : ''}>`;
+    return `<div class="pi-check-row ${rowClass}">${checkbox}<span>${escapeHTML(item.text)}</span></div>`;
+  }).join('');
+
+  return `
+  <div class="progress-item ${isExpanded ? 'expanded' : ''}" data-id="${c.id}">
+    <div class="progress-item-header" data-toggle-id="${c.id}">
+      <button type="button" class="chevron-btn">▸</button>
+      <div class="pi-name">${escapeHTML(c.name)}</div>
+      ${c.duration ? `<span class="duration-badge">⏱ ${escapeHTML(c.duration)}</span>` : ''}
+      <span class="status-tag ${tagClass}">${tagText}</span>
+      <div class="pi-progress-mini">
+        <div class="progress-track"><div class="progress-fill" style="width:${c.progress}%"></div></div>
+        <span class="progress-pct">${c.progress}%</span>
+      </div>
+      ${isShareView ? '' : `<button type="button" class="edit-btn" data-edit-id="${c.id}" title="編輯課程">✎</button>`}
+    </div>
+    <div class="progress-item-body">
+      <div class="pi-badges">
+        ${tagBadges}
+        ${dueHTML}
+        ${stalled ? `<span class="stalled-badge">⚠ ${stalledDays} 天沒有動作</span>` : ''}
+        ${scheduleBadges}
+      </div>
+      ${c.note ? `<div class="course-note">📝 ${linkifyNote(c.note)}</div>` : ''}
+      ${c.loginUrl ? `<div class="course-login">🔗 ${linkifyNote(c.loginUrl)}</div>` : ''}
+      ${hasItems ? `<div class="pi-checklist">${checklistHTML}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+function attachProgressItemEvents(container){
+  container.querySelectorAll('.progress-item-header').forEach(header=>{
+    header.addEventListener('click', (e)=>{
+      if(e.target.closest('.edit-btn')) return;
+      const id = header.dataset.toggleId;
+      if(expandedProgressIds.has(id)) expandedProgressIds.delete(id);
+      else expandedProgressIds.add(id);
+      renderProgress();
+    });
+  });
+  container.querySelectorAll('.edit-btn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      openModal(btn.dataset.editId);
+    });
+  });
+  container.querySelectorAll('.pi-check-row input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener('click', (e)=> e.stopPropagation());
+    cb.addEventListener('change', (e)=>{
+      toggleChecklistItemDirect(cb.dataset.courseId, cb.dataset.itemId, e.target.checked);
+    });
+  });
+}
+
+function toggleChecklistItemDirect(courseId, itemId, doneVal){
+  if(isShareView) return;
+  const course = courses.find(c=>c.id === courseId);
+  if(!course) return;
+  const item = (course.items || []).find(i=>i.id === itemId);
+  if(!item) return;
+  item.done = doneVal;
+  const computed = computeProgressFromItems(course.items);
+  if(computed !== null) course.progress = computed;
+  course.lastActivity = new Date().toISOString().slice(0,10);
+  saveCourses();
+  renderAll();
+}
+
+function renderProgress(){
+  const doing = courses.filter(c=>statusOf(c)==='doing').sort((a,b)=>b.progress-a.progress);
+  const todo = courses.filter(c=>statusOf(c)==='todo');
+  const done = courses.filter(c=>statusOf(c)==='done');
+
+  document.getElementById('progDoingCount').textContent = doing.length;
+  document.getElementById('progTodoCount').textContent = todo.length;
+  document.getElementById('progDoneCount').textContent = done.length;
+
+  const doingEl = document.getElementById('progDoing');
+  doingEl.innerHTML = doing.length ? doing.map(progressItemHTML).join('') : `<div class="empty-state"><span class="glyph">📖</span><p>目前沒有進行中的課程。</p></div>`;
+  attachProgressItemEvents(doingEl);
+
+  const todoEl = document.getElementById('progTodo');
+  todoEl.innerHTML = todo.length ? todo.map(progressItemHTML).join('') : `<div class="empty-state"><span class="glyph">🌱</span><p>沒有尚未開始的課程。</p></div>`;
+  attachProgressItemEvents(todoEl);
+
+  const doneEl = document.getElementById('progDone');
+  doneEl.innerHTML = done.length ? done.map(progressItemHTML).join('') : `<div class="empty-state"><span class="glyph">🏅</span><p>還沒有已完成的課程，繼續加油。</p></div>`;
+  attachProgressItemEvents(doneEl);
+}
+
+function renderAll(){
+  renderDashboard();
+  renderSchedule();
+  renderList();
+  renderProgress();
+}
+
+// ---------- Modal ----------
+const overlay = document.getElementById('modalOverlay');
+let draftItems = [];
+let draftSchedule = [];
+let draftTags = [];
+let dragTagId = null;
+
+function scheduleUid(){ return 's_' + Date.now() + '_' + Math.random().toString(36).slice(2,6); }
+
+function renderScheduleList(){
+  const container = document.getElementById('scheduleList');
+  if(draftSchedule.length === 0){
+    container.innerHTML = `<div class="schedule-empty">還沒有設定固定上課時間。</div>`;
+  } else {
+    const typeOrder = { weekly: 0, single: 1, range: 2 };
+    const sortKey = (s) => {
+      if(s.type === 'single') return s.date;
+      if(s.type === 'range') return s.startDate;
+      return String(s.weekday).padStart(2,'0');
+    };
+    const sorted = [...draftSchedule].sort((a,b)=>{
+      const ta = typeOrder[a.type] ?? 0;
+      const tb = typeOrder[b.type] ?? 0;
+      if(ta !== tb) return ta - tb;
+      return sortKey(a).localeCompare(sortKey(b)) || a.time.localeCompare(b.time);
+    });
+    container.innerHTML = sorted.map(s => `
+      <div class="schedule-chip" data-schedule-id="${s.id}">
+        <span>${formatSchedule(s)}</span>
+        <button type="button" class="remove-item">×</button>
+      </div>
+    `).join('');
+    container.querySelectorAll('.schedule-chip').forEach(chip=>{
+      const id = chip.dataset.scheduleId;
+      chip.querySelector('.remove-item').addEventListener('click', ()=>{
+        draftSchedule = draftSchedule.filter(s=>s.id !== id);
+        renderScheduleList();
+      });
+    });
+  }
+}
+document.getElementById('scheduleType').addEventListener('change', (e)=>{
+  const type = e.target.value;
+  document.getElementById('scheduleWeeklyFields').style.display = type === 'weekly' ? 'contents' : 'none';
+  document.getElementById('scheduleSingleFields').style.display = type === 'single' ? 'contents' : 'none';
+  document.getElementById('scheduleRangeFields').style.display = type === 'range' ? 'contents' : 'none';
+});
+document.getElementById('addScheduleBtn').addEventListener('click', ()=>{
+  const type = document.getElementById('scheduleType').value;
+  const time = document.getElementById('scheduleTime').value;
+  if(!time){ showToast('請選擇上課時間'); return; }
+
+  let entry = { id: scheduleUid(), type, time };
+  if(type === 'weekly'){
+    entry.weekday = parseInt(document.getElementById('scheduleWeekday').value, 10);
+  } else if(type === 'single'){
+    const d = document.getElementById('scheduleSingleDate').value;
+    if(!d){ showToast('請選擇日期'); return; }
+    entry.date = d;
+  } else if(type === 'range'){
+    const s = document.getElementById('scheduleRangeStart').value;
+    const e = document.getElementById('scheduleRangeEnd').value;
+    if(!s || !e){ showToast('請選擇區間起訖日期'); return; }
+    if(s > e){ showToast('結束日期不能早於開始日期'); return; }
+    entry.startDate = s;
+    entry.endDate = e;
+  }
+
+  const exists = draftSchedule.some(s => JSON.stringify({...s, id:null}) === JSON.stringify({...entry, id:null}));
+  if(exists){ showToast('這個時段已經加過了'); return; }
+  draftSchedule.push(entry);
+  renderScheduleList();
+});
+
+// ---------- Tags ----------
+function renderTagExistingSelect(){
+  const sel = document.getElementById('tagExistingSelect');
+  const available = allTags.filter(t => !draftTags.includes(t));
+  sel.innerHTML = `<option value="">選擇已有標籤...</option>` +
+    available.map(t => `<option value="${escapeHTML(t)}">${escapeHTML(t)}</option>`).join('');
+}
+
+function renderTagList(){
+  const container = document.getElementById('tagList');
+  if(draftTags.length === 0){
+    container.innerHTML = `<div class="checklist-empty" style="padding:2px 0;">還沒有加標籤。</div>`;
+  } else {
+    container.innerHTML = draftTags.map(tag => {
+      const color = tagColor(tag);
+      let cls = 'tag-chip';
+      if(tag === dragTagId) cls += ' dragging';
+      return `<div class="${cls}" data-tag="${escapeHTML(tag)}" style="background:${color.bg};">
+        <span class="drag-handle" title="拖曳排序">⠿</span>
+        <span style="color:${color.fg}; font-weight:700;">${escapeHTML(tag)}</span>
+        <button type="button" class="remove-item" style="color:${color.fg};">×</button>
+      </div>`;
+    }).join('');
+    container.querySelectorAll('.tag-chip').forEach(chip=>{
+      const tag = chip.dataset.tag;
+      chip.querySelector('.remove-item').addEventListener('click', ()=>{
+        draftTags = draftTags.filter(t=>t !== tag);
+        renderTagList();
+      });
+      chip.querySelector('.drag-handle').addEventListener('pointerdown', (e)=>{
+        e.preventDefault();
+        dragTagId = tag;
+        startTagDragTracking();
+      });
+    });
+  }
+  renderTagExistingSelect();
+}
+
+function startTagDragTracking(){
+  const onMove = (e)=>{
+    if(!dragTagId) return;
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const overChip = el && el.closest && el.closest('.tag-chip');
+    document.querySelectorAll('.tag-chip.drag-over').forEach(c=>c.classList.remove('drag-over'));
+    if(overChip && overChip.dataset.tag !== dragTagId){
+      overChip.classList.add('drag-over');
+    }
+  };
+  const onUp = (e)=>{
+    if(dragTagId){
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      const overChip = el && el.closest && el.closest('.tag-chip');
+      if(overChip && overChip.dataset.tag !== dragTagId){
+        const fromIdx = draftTags.indexOf(dragTagId);
+        const toIdx = draftTags.indexOf(overChip.dataset.tag);
+        if(fromIdx !== -1 && toIdx !== -1){
+          const [moved] = draftTags.splice(fromIdx, 1);
+          draftTags.splice(toIdx, 0, moved);
+        }
+      }
+    }
+    dragTagId = null;
+    document.querySelectorAll('.tag-chip.drag-over').forEach(c=>c.classList.remove('drag-over'));
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', onUp);
+    renderTagList();
+  };
+  document.addEventListener('pointermove', onMove);
+  document.addEventListener('pointerup', onUp);
+}
+
+document.getElementById('tagExistingSelect').addEventListener('change', (e)=>{
+  const val = e.target.value;
+  if(val && !draftTags.includes(val)){
+    draftTags.push(val);
+    renderTagList();
+  }
+  e.target.value = '';
+});
+document.getElementById('addTagBtn').addEventListener('click', ()=>{
+  const input = document.getElementById('tagNewInput');
+  const val = input.value.trim();
+  if(!val) return;
+  if(!allTags.includes(val)){
+    allTags.push(val);
+    saveAllTags();
+  }
+  if(!draftTags.includes(val)) draftTags.push(val);
+  input.value = '';
+  renderTagList();
+});
+document.getElementById('tagNewInput').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    document.getElementById('addTagBtn').click();
+  }
+});
+
+let dragManageTagId = null;
+
+function renderTagManageList(){
+  const container = document.getElementById('tagManageList');
+  if(allTags.length === 0){
+    container.innerHTML = `<div class="checklist-empty">還沒有任何標籤。</div>`;
+    return;
+  }
+  container.innerHTML = allTags.map(tag => {
+    let cls = 'tag-manage-row';
+    if(tag === dragManageTagId) cls += ' dragging';
+    return `
+    <div class="${cls}" data-tag="${escapeHTML(tag)}">
+      <span class="drag-handle" title="拖曳排序">⠿</span>
+      <input type="text" value="${escapeHTML(tag)}">
+      <button type="button" class="remove-item" title="刪除這個標籤">×</button>
+    </div>`;
+  }).join('');
+  container.querySelectorAll('.tag-manage-row').forEach(row=>{
+    const oldTag = row.dataset.tag;
+    const input = row.querySelector('input[type=text]');
+    const commitRename = ()=>{
+      const newTag = input.value.trim();
+      if(!newTag || newTag === oldTag) { input.value = oldTag; return; }
+      renameTagEverywhere(oldTag, newTag);
+    };
+    input.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter'){ e.preventDefault(); input.blur(); }
+    });
+    input.addEventListener('blur', commitRename);
+    row.querySelector('.remove-item').addEventListener('click', ()=>{
+      deleteTagEverywhere(oldTag);
+    });
+    row.querySelector('.drag-handle').addEventListener('pointerdown', (e)=>{
+      e.preventDefault();
+      dragManageTagId = oldTag;
+      startManageTagDragTracking();
+    });
+  });
+}
+
+function startManageTagDragTracking(){
+  const onMove = (e)=>{
+    if(!dragManageTagId) return;
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const overRow = el && el.closest && el.closest('.tag-manage-row');
+    document.querySelectorAll('.tag-manage-row.drag-over').forEach(r=>r.classList.remove('drag-over'));
+    if(overRow && overRow.dataset.tag !== dragManageTagId){
+      overRow.classList.add('drag-over');
+    }
+  };
+  const onUp = (e)=>{
+    if(dragManageTagId){
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      const overRow = el && el.closest && el.closest('.tag-manage-row');
+      if(overRow && overRow.dataset.tag !== dragManageTagId){
+        const fromIdx = allTags.indexOf(dragManageTagId);
+        const toIdx = allTags.indexOf(overRow.dataset.tag);
+        if(fromIdx !== -1 && toIdx !== -1){
+          const [moved] = allTags.splice(fromIdx, 1);
+          allTags.splice(toIdx, 0, moved);
+          saveAllTags();
+        }
+      }
+    }
+    dragManageTagId = null;
+    document.querySelectorAll('.tag-manage-row.drag-over').forEach(r=>r.classList.remove('drag-over'));
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', onUp);
+    renderTagManageList();
+    renderTagExistingSelect();
+  };
+  document.addEventListener('pointermove', onMove);
+  document.addEventListener('pointerup', onUp);
+}
+
+function renameTagEverywhere(oldTag, newTag){
+  // update global tag library (merge if newTag already exists)
+  allTags = allTags.filter(t => t !== oldTag);
+  if(!allTags.includes(newTag)) allTags.push(newTag);
+  saveAllTags();
+  renameTagColor(oldTag, newTag);
+
+  // update the course currently being edited (draft, not yet saved)
+  draftTags = draftTags.map(t => t === oldTag ? newTag : t)
+    .filter((t, idx, arr) => arr.indexOf(t) === idx);
+
+  // update every saved course
+  let changed = false;
+  courses.forEach(c=>{
+    if(c.tags && c.tags.includes(oldTag)){
+      c.tags = c.tags.map(t => t === oldTag ? newTag : t)
+        .filter((t, idx, arr) => arr.indexOf(t) === idx);
+      changed = true;
+    }
+  });
+  if(changed) saveCourses();
+
+  renderTagManageList();
+  renderTagList();
+  renderAll();
+  showToast(`已將「${oldTag}」改名為「${newTag}」`);
+}
+
+function deleteTagEverywhere(tag){
+  allTags = allTags.filter(t => t !== tag);
+  saveAllTags();
+  deleteTagColor(tag);
+  draftTags = draftTags.filter(t => t !== tag);
+
+  let changed = false;
+  courses.forEach(c=>{
+    if(c.tags && c.tags.includes(tag)){
+      c.tags = c.tags.filter(t => t !== tag);
+      changed = true;
+    }
+  });
+  if(changed) saveCourses();
+
+  renderTagManageList();
+  renderTagList();
+  renderAll();
+  showToast(`已刪除標籤「${tag}」`);
+}
+
+document.getElementById('tagManageBtn').addEventListener('click', ()=>{
+  const list = document.getElementById('tagManageList');
+  const willShow = list.style.display === 'none';
+  list.style.display = willShow ? 'flex' : 'none';
+  if(willShow) renderTagManageList();
+});
+
+function itemUid(){ return 'i_' + Date.now() + '_' + Math.random().toString(36).slice(2,6); }
+
+let dragId = null;
+
+function renderChecklist(){
+  const container = document.getElementById('checklistItems');
+  if(draftItems.length === 0){
+    container.innerHTML = `<div class="checklist-empty">還沒有加入大綱項目，貼上課綱或手動新增後，會依子項目勾選比例自動計算進度。</div>`;
+  } else {
+    container.innerHTML = draftItems.map((item) => {
+      const isHeader = item.type === 'header';
+      let rowClass = isHeader ? 'header-row' : 'child-row' + (item.done ? ' checked' : '');
+      if(item.id === dragId) rowClass += ' dragging';
+      const checkbox = isHeader ? '' : `<input type="checkbox" ${item.done ? 'checked' : ''}>`;
+      const toggleTitle = isHeader ? '改成子項目' : '改成大標題';
+      const toggleIcon = isHeader ? '↧' : '↥';
+      return `
+      <div class="checklist-item ${rowClass}" data-item-id="${item.id}">
+        <span class="drag-handle" title="拖曳排序">⠿</span>
+        <button type="button" class="type-toggle" title="${toggleTitle}">${toggleIcon}</button>
+        ${checkbox}
+        <input type="text" value="${escapeHTML(item.text)}">
+        <button type="button" class="remove-item">×</button>
+      </div>`;
+    }).join('');
+    container.querySelectorAll('.checklist-item').forEach(row=>{
+      const id = row.dataset.itemId;
+      const item = draftItems.find(i=>i.id === id);
+      const checkboxEl = row.querySelector('input[type=checkbox]');
+      if(checkboxEl){
+        checkboxEl.addEventListener('change', (e)=>{
+          item.done = e.target.checked;
+          renderChecklist();
+          syncProgressWithItems();
+        });
+      }
+      row.querySelector('input[type=text]').addEventListener('input', (e)=>{
+        item.text = e.target.value;
+      });
+      row.querySelector('.remove-item').addEventListener('click', ()=>{
+        draftItems = draftItems.filter(i=>i.id !== id);
+        renderChecklist();
+        syncProgressWithItems();
+      });
+      row.querySelector('.type-toggle').addEventListener('click', ()=>{
+        item.type = item.type === 'header' ? 'item' : 'header';
+        if(item.type === 'header') item.done = false;
+        renderChecklist();
+        syncProgressWithItems();
+      });
+      row.querySelector('.drag-handle').addEventListener('pointerdown', (e)=>{
+        e.preventDefault();
+        dragId = id;
+        startDragTracking();
+      });
+    });
+  }
+  syncProgressUI();
+}
+
+function startDragTracking(){
+  const onMove = (e)=>{
+    if(!dragId) return;
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const overRow = el && el.closest && el.closest('.checklist-item');
+    document.querySelectorAll('.checklist-item.drag-over').forEach(r=>r.classList.remove('drag-over'));
+    if(overRow && overRow.dataset.itemId !== dragId){
+      overRow.classList.add('drag-over');
+    }
+  };
+  const onUp = (e)=>{
+    if(dragId){
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      const overRow = el && el.closest && el.closest('.checklist-item');
+      if(overRow && overRow.dataset.itemId !== dragId){
+        const fromIdx = draftItems.findIndex(i=>i.id === dragId);
+        const toIdx = draftItems.findIndex(i=>i.id === overRow.dataset.itemId);
+        if(fromIdx !== -1 && toIdx !== -1){
+          const [moved] = draftItems.splice(fromIdx, 1);
+          draftItems.splice(toIdx, 0, moved);
+        }
+      }
+    }
+    dragId = null;
+    document.querySelectorAll('.checklist-item.drag-over').forEach(r=>r.classList.remove('drag-over'));
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', onUp);
+    renderChecklist();
+  };
+  document.addEventListener('pointermove', onMove);
+  document.addEventListener('pointerup', onUp);
+}
+
+function syncProgressUI(){
+  const range = document.getElementById('progressRange');
+  const hint = document.getElementById('progressModeHint');
+  const computed = computeProgressFromItems(draftItems);
+  if(computed !== null){
+    range.value = computed;
+    range.disabled = true;
+    document.getElementById('progressLabel').textContent = computed;
+    hint.style.display = 'inline';
+  } else {
+    range.disabled = false;
+    hint.style.display = 'none';
+  }
+}
+function syncProgressWithItems(){
+  syncProgressUI();
+}
+
+document.getElementById('addItemBtn').addEventListener('click', ()=>{
+  const input = document.getElementById('itemInput');
+  const type = document.getElementById('itemTypeSelect').value;
+  const text = input.value.trim();
+  if(!text) return;
+  draftItems.push({id: itemUid(), text, done:false, type});
+  input.value = '';
+  renderChecklist();
+  syncProgressWithItems();
+  input.focus();
+});
+document.getElementById('itemInput').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    document.getElementById('addItemBtn').click();
+  }
+});
+
+function parseOutlineToNodes(raw){
+  return raw
+    .split('\n')
+    .filter(line => line.trim().length > 0)
+    .map(line => {
+      const hasIndent = /^[ \t]/.test(line); // leading space/tab = common sub-item convention
+      // strip leading checkbox glyphs / bullets first
+      let cleaned = line.trim().replace(/^[✅☑✔️☐▢□\-\*•‧・]+\s*/, '').trim();
+      // normalize full-width digits (１-１) to half-width (1-1) for pattern matching only
+      const normalized = cleaned.replace(/[０-９]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0));
+      // child pattern: "1-1" / "1.1" / "1_1" / "1、1" style sub-numbering
+      const numberedChild = /\d+\s*[-._、]\s*\d+/.test(normalized);
+      const isChild = numberedChild || hasIndent;
+      return { type: isChild ? 'item' : 'header', text: cleaned, done: false };
+    })
+    .filter(node => node.text.length > 0);
+}
+
+document.getElementById('bulkAddBtn').addEventListener('click', ()=>{
+  const textarea = document.getElementById('bulkItemInput');
+  const nodes = parseOutlineToNodes(textarea.value);
+  if(nodes.length === 0){
+    showToast('沒有偵測到可用的項目內容');
+    return;
+  }
+  nodes.forEach(node => draftItems.push({id: itemUid(), text: node.text, done:false, type: node.type}));
+  textarea.value = '';
+  renderChecklist();
+  syncProgressWithItems();
+  const childCount = nodes.filter(n=>n.type==='item').length;
+  const headerCount = nodes.length - childCount;
+  showToast(`已新增 ${headerCount} 個標題、${childCount} 個子項目`);
+});
+
+
+function openModal(id){
+  if(isShareView) return;
+  editingId = id || null;
+  const form = document.getElementById('courseForm');
+  form.reset();
+  document.getElementById('progressLabel').textContent = '0';
+  document.getElementById('progressRange').disabled = false;
+  document.getElementById('progressModeHint').style.display = 'none';
+  if(id){
+    const c = courses.find(x=>x.id === id);
+    document.getElementById('modalTitle').textContent = '編輯課程';
+    document.getElementById('courseId').value = c.id;
+    document.getElementById('courseName').value = c.name;
+    document.getElementById('courseAlias').value = c.alias || '';
+    document.getElementById('startDate').value = c.startDate || '';
+    document.getElementById('dueDate').value = c.dueDate || '';
+    document.getElementById('courseDuration').value = c.duration || '';
+    document.getElementById('progressRange').value = c.progress;
+    document.getElementById('progressLabel').textContent = c.progress;
+    document.getElementById('courseNote').value = c.note || '';
+    document.getElementById('courseLoginUrl').value = c.loginUrl || '';
+    document.getElementById('deleteRow').style.display = 'flex';
+    draftItems = (c.items || []).map(i=>({...i, type: i.type || 'item'}));
+    draftSchedule = (c.recurring || []).map(s=>({...s, type: s.type || 'weekly'}));
+    draftTags = [...(c.tags || [])];
+  } else {
+    document.getElementById('modalTitle').textContent = '新增課程';
+    document.getElementById('courseId').value = '';
+    document.getElementById('deleteRow').style.display = 'none';
+    draftItems = [];
+    draftSchedule = [];
+    draftTags = [];
+  }
+  document.getElementById('scheduleType').value = 'weekly';
+  document.getElementById('scheduleWeeklyFields').style.display = 'contents';
+  document.getElementById('scheduleSingleFields').style.display = 'none';
+  document.getElementById('scheduleRangeFields').style.display = 'none';
+  renderChecklist();
+  renderScheduleList();
+  renderTagList();
+  overlay.classList.add('open');
+}
+function closeModal(){
+  overlay.classList.remove('open');
+  editingId = null;
+  draftItems = [];
+  draftSchedule = [];
+  draftTags = [];
+}
+document.getElementById('fabAdd').addEventListener('click', ()=>openModal(null));
+document.getElementById('cancelBtn').addEventListener('click', closeModal);
+overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeModal(); });
+
+document.getElementById('progressRange').addEventListener('input', (e)=>{
+  document.getElementById('progressLabel').textContent = e.target.value;
+});
+
+document.getElementById('courseForm').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const id = document.getElementById('courseId').value;
+  const name = document.getElementById('courseName').value.trim();
+  if(!name){ return; }
+  const computed = computeProgressFromItems(draftItems);
+  const data = {
+    name,
+    alias: document.getElementById('courseAlias').value.trim(),
+    startDate: document.getElementById('startDate').value,
+    dueDate: document.getElementById('dueDate').value,
+    duration: document.getElementById('courseDuration').value.trim(),
+    progress: computed !== null ? computed : parseInt(document.getElementById('progressRange').value, 10),
+    note: document.getElementById('courseNote').value.trim(),
+    loginUrl: document.getElementById('courseLoginUrl').value.trim(),
+    items: draftItems,
+    recurring: draftSchedule,
+    tags: draftTags,
+    lastActivity: new Date().toISOString().slice(0,10)
+  };
+  if(id){
+    const idx = courses.findIndex(c=>c.id === id);
+    courses[idx] = {...courses[idx], ...data};
+    showToast('課程已更新');
+  } else {
+    courses.push({id: uid(), ...data});
+    showToast('課程已新增');
+  }
+  saveCourses();
+  closeModal();
+  renderAll();
+});
+
+document.getElementById('deleteBtn').addEventListener('click', ()=>{
+  if(!editingId) return;
+  if(!confirm('確定要刪除這堂課嗎？此動作無法復原。')) return;
+  courses = courses.filter(c=>c.id !== editingId);
+  saveCourses();
+  showToast('課程已刪除');
+  closeModal();
+  renderAll();
+});
+
+// ---------- List filters ----------
+document.getElementById('searchInput').addEventListener('input', renderList);
+document.getElementById('statusFilter').addEventListener('change', renderList);
+document.getElementById('sortSelect').addEventListener('change', renderList);
+
+// ---------- Export / Import ----------
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(courses, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const today = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `course-journal-backup-${today}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('備份已匯出');
+});
+
+document.getElementById('importBtn').addEventListener('click', ()=>{
+  document.getElementById('importFile').click();
+});
+document.getElementById('importFile').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt)=>{
+    try{
+      const data = JSON.parse(evt.target.result);
+      if(!Array.isArray(data)) throw new Error('格式錯誤');
+      const valid = data.every(c=>typeof c.name === 'string');
+      if(!valid) throw new Error('格式錯誤');
+      const merge = confirm('選擇「確定」將以匯入的資料覆蓋目前的課程清單；選擇「取消」則合併（保留現有課程並加入新項目）。');
+      if(merge){
+        courses = data.map(c=>({...c, id: c.id || uid()}));
+      } else {
+        const existingIds = new Set(courses.map(c=>c.id));
+        data.forEach(c=>{
+          if(!c.id || !existingIds.has(c.id)){
+            courses.push({...c, id: c.id || uid()});
+          }
+        });
+      }
+      saveCourses();
+      renderAll();
+      showToast('備份已匯入');
+    }catch(err){
+      alert('匯入失敗：檔案格式不正確。請確認選擇的是本工具匯出的備份檔。');
+    }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+});
+
+// ---------- Seed sample data on first run ----------
+function seedIfEmpty(){
+  if(courses.length > 0) return;
+  const today = new Date();
+  const plus = (d)=>{ const t = new Date(today); t.setDate(t.getDate()+d); return t.toISOString().slice(0,10); };
+  const minus = (d)=>{ const t = new Date(today); t.setDate(t.getDate()-d); return t.toISOString().slice(0,10); };
+  courses = [
+    {id: uid(), name:'進階塔羅牌陣解讀', startDate: minus(10), dueDate: plus(5), progress: 60, note:'', loginUrl:'https://school.example.com/login', lastActivity: minus(2),
+      items:[
+        {id:'i0', text:'CH1 創業之道｜建立創業思維', done:false, type:'header'},
+        {id:'i1', text:'1-1 創業路徑：三年內從零到營收破 10 億，我做對了什麼？', done:true, type:'item'},
+        {id:'i2', text:'1-2 創業的三大真相：90% 的人賠錢，因為沒搞懂這三件事', done:true, type:'item'},
+        {id:'i3', text:'1-3 財富的三大真相：為什麼學那麼多方法，錢還是沒變多？', done:false, type:'item'},
+        {id:'i4', text:'CH2 實戰演練', done:false, type:'header'},
+        {id:'i5', text:'2-1 個案演練與回饋', done:false, type:'item'}
+      ],
+      recurring:[{id:'sch1', type:'weekly', weekday:4, time:'22:00'}]},
+    {id: uid(), name:'水晶能量療癒入門', startDate: minus(3), dueDate: plus(20), progress: 20, note:'', lastActivity: minus(9), items:[],
+      recurring:[{id:'sch2', type:'weekly', weekday:2, time:'20:00'}]},
+    {id: uid(), name:'生命靈數基礎課', startDate: '', dueDate: plus(2), progress: 0, note:'尚未開始，記得先預習講義', lastActivity: '', items:[]},
+    {id: uid(), name:'手作皮革工藝體驗', startDate: minus(30), dueDate: minus(1), progress: 100, note:'', lastActivity: minus(1), items:[]},
+  ];
+  saveCourses();
+}
+
+// ---------- Cloud Sync (via Supabase — project is pre-configured, no setup needed) ----------
+const SUPABASE_CONFIG_KEY = 'course_journal_supabase_config_v1';
+const HARDCODED_SUPABASE_URL = 'https://tsuyldllmrjqwpkdhnge.supabase.co';
+const HARDCODED_SUPABASE_ANON_KEY = 'sb_publishable_cKG_N9YsY6K7gPadRwVOqw_uEClmhEN';
+let supabaseClient = null;
+let supabaseUser = null;
+let realtimeChannel = null;
+let pushDebounceTimer = null;
+let cloudAuthMode = 'magic'; // 'magic' | 'signin' | 'signup'
+
+function loadSupabaseConfig(){
+  return { url: HARDCODED_SUPABASE_URL, anonKey: HARDCODED_SUPABASE_ANON_KEY };
+}
+function saveSupabaseConfig(cfg){
+  // no-op: project is pre-configured and shared by everyone using this file
+}
+function clearSupabaseConfig(){
+  // no-op: nothing to clear, config is fixed
+}
+
+function initSupabaseClient(){
+  const cfg = loadSupabaseConfig();
+  if(!cfg || !cfg.url || !cfg.anonKey) return null;
+  if(!window.supabase || !window.supabase.createClient){ return null; }
+  try{
+    supabaseClient = window.supabase.createClient(cfg.url, cfg.anonKey);
+    supabaseClient.auth.onAuthStateChange((event, session)=>{
+      if(event === 'PASSWORD_RECOVERY'){
+        document.getElementById('cloudStep1').style.display = 'none';
+        document.getElementById('cloudStep2').style.display = 'block';
+        document.getElementById('cloudLoggedOutView').style.display = 'none';
+        document.getElementById('cloudLoggedInView').style.display = 'none';
+        document.getElementById('cloudRecoveryView').style.display = 'block';
+        document.getElementById('cloudModalOverlay').classList.add('open');
+        return;
+      }
+      if(event === 'SIGNED_IN' && session && session.user && (!supabaseUser || supabaseUser.id !== session.user.id)){
+        supabaseUser = session.user;
+        afterLogin();
+        closeCloudModal();
+        showToast('已登入');
+      }
+      if(event === 'SIGNED_OUT'){
+        supabaseUser = null;
+        updateCloudStatusUI();
+      }
+    });
+  }catch(e){
+    supabaseClient = null;
+  }
+  return supabaseClient;
+}
+
+function buildStateBlob(){
+  return { courses, tags: allTags, tagColorMap, nextTagColorIndex };
+}
+function applyStateBlob(blob){
+  if(!blob) return;
+  courses = blob.courses || [];
+  allTags = blob.tags || allTags;
+  tagColorMap = blob.tagColorMap || {};
+  nextTagColorIndex = blob.nextTagColorIndex || 0;
+  saveCourses();
+  saveAllTags();
+  saveTagColors();
+}
+
+async function pullFromCloudAndResolve(){
+  if(!supabaseClient || !supabaseUser) return;
+  const { data, error } = await supabaseClient
+    .from('app_state')
+    .select('data, updated_at')
+    .eq('user_id', supabaseUser.id)
+    .maybeSingle();
+  if(error){ showToast('雲端讀取失敗：' + error.message); return; }
+
+  const cloudHasData = data && data.data && (
+    (data.data.courses && data.data.courses.length) ||
+    (data.data.tags && data.data.tags.length)
+  );
+  const hasLocalData = courses.length > 0;
+
+  if(cloudHasData && hasLocalData){
+    const useCloud = confirm('偵測到雲端已經有資料。\n按「確定」用雲端資料覆蓋本機、按「取消」改用本機資料覆蓋雲端。');
+    if(useCloud){
+      applyStateBlob(data.data);
+      renderAll();
+      showToast('已套用雲端資料');
+    } else {
+      await pushToCloud(true);
+      showToast('已將本機資料上傳到雲端');
+    }
+  } else if(cloudHasData){
+    applyStateBlob(data.data);
+    renderAll();
+    showToast('已套用雲端資料');
+  } else {
+    await pushToCloud(true);
+  }
+}
+
+async function pushToCloud(immediate){
+  if(!supabaseClient || !supabaseUser) return;
+  const doPush = async ()=>{
+    const blob = buildStateBlob();
+    const { error } = await supabaseClient.from('app_state').upsert({
+      user_id: supabaseUser.id,
+      data: blob,
+      updated_at: new Date().toISOString()
+    });
+    if(error) console.error('cloud push error', error);
+  };
+  if(immediate){
+    await doPush();
+  } else {
+    clearTimeout(pushDebounceTimer);
+    pushDebounceTimer = setTimeout(doPush, 800);
+  }
+}
+function triggerCloudPush(){
+  if(supabaseClient && supabaseUser) pushToCloud(false);
+}
+
+function subscribeRealtime(){
+  if(!supabaseClient || !supabaseUser) return;
+  if(realtimeChannel){ supabaseClient.removeChannel(realtimeChannel); }
+  realtimeChannel = supabaseClient
+    .channel('app_state_changes_' + supabaseUser.id)
+    .on('postgres_changes',
+      { event: '*', schema: 'public', table: 'app_state', filter: `user_id=eq.${supabaseUser.id}` },
+      (payload)=>{
+        if(payload.new && payload.new.data){
+          applyStateBlob(payload.new.data);
+          renderAll();
+        }
+      })
+    .subscribe();
+}
+
+function updateCloudStatusUI(){
+  const line = document.getElementById('cloudStatusLine');
+  if(!line) return;
+  if(supabaseUser){
+    line.innerHTML = `<span class="dot on"></span>已連接：${escapeHTML(supabaseUser.email || '')}`;
+    document.getElementById('cloudLoggedOutView').style.display = 'none';
+    document.getElementById('cloudLoggedInView').style.display = 'block';
+  } else {
+    line.innerHTML = `<span class="dot off"></span>尚未登入`;
+    document.getElementById('cloudLoggedOutView').style.display = 'block';
+    document.getElementById('cloudLoggedInView').style.display = 'none';
+  }
+}
+
+async function afterLogin(){
+  updateCloudStatusUI();
+  await pullFromCloudAndResolve();
+  subscribeRealtime();
+  await loadShareState();
+}
+
+async function checkExistingSession(){
+  if(!supabaseClient) return;
+  try{
+    const { data } = await supabaseClient.auth.getSession();
+    if(data && data.session){
+      supabaseUser = data.session.user;
+      await afterLogin();
+    }
+  }catch(e){ /* ignore */ }
+}
+
+function openCloudModal(){
+  const cfg = loadSupabaseConfig();
+  if(!cfg){
+    document.getElementById('cloudStep1').style.display = 'block';
+    document.getElementById('cloudStep2').style.display = 'none';
+  } else {
+    document.getElementById('cloudUrlInput').value = cfg.url;
+    document.getElementById('cloudAnonInput').value = cfg.anonKey;
+    document.getElementById('cloudStep1').style.display = 'none';
+    document.getElementById('cloudStep2').style.display = 'block';
+    document.getElementById('cloudRecoveryView').style.display = 'none';
+    document.getElementById('cloudLoggedOutView').style.display = supabaseUser ? 'none' : 'block';
+    setCloudAuthMode('magic');
+    updateCloudStatusUI();
+  }
+  document.getElementById('cloudModalOverlay').classList.add('open');
+}
+function closeCloudModal(){
+  document.getElementById('cloudModalOverlay').classList.remove('open');
+}
+
+document.getElementById('cloudSyncBtn').addEventListener('click', openCloudModal);
+document.getElementById('cloudCloseBtn1').addEventListener('click', closeCloudModal);
+document.getElementById('cloudCloseBtn2').addEventListener('click', closeCloudModal);
+document.getElementById('cloudModalOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'cloudModalOverlay') closeCloudModal();
+});
+
+document.getElementById('cloudSaveConfigBtn').addEventListener('click', ()=>{
+  const url = document.getElementById('cloudUrlInput').value.trim();
+  const anonKey = document.getElementById('cloudAnonInput').value.trim();
+  if(!url || !anonKey){ showToast('請填入 URL 和 anon key'); return; }
+  saveSupabaseConfig({ url, anonKey });
+  if(!initSupabaseClient()){
+    showToast('無法建立連線，請確認網址與金鑰是否正確');
+    return;
+  }
+  document.getElementById('cloudStep1').style.display = 'none';
+  document.getElementById('cloudStep2').style.display = 'block';
+  updateCloudStatusUI();
+  checkExistingSession();
+});
+
+function setCloudAuthMode(mode){
+  cloudAuthMode = mode;
+  document.getElementById('cloudTabSignIn').classList.toggle('active', mode === 'signin');
+  document.getElementById('cloudTabSignUp').classList.toggle('active', mode === 'signup');
+  document.getElementById('cloudTabMagic').classList.toggle('active', mode === 'magic');
+  const isMagic = mode === 'magic';
+  document.getElementById('cloudPasswordField').style.display = isMagic ? 'none' : 'block';
+  document.getElementById('cloudMagicHint').style.display = isMagic ? 'block' : 'none';
+  document.getElementById('forgotPasswordBtn').style.display = mode === 'signin' ? 'inline-block' : 'none';
+  document.getElementById('cloudAuthSubmitBtn').textContent =
+    mode === 'signin' ? '登入' : mode === 'signup' ? '註冊' : '寄送登入連結';
+}
+document.getElementById('cloudTabSignIn').addEventListener('click', ()=> setCloudAuthMode('signin'));
+document.getElementById('cloudTabSignUp').addEventListener('click', ()=> setCloudAuthMode('signup'));
+document.getElementById('cloudTabMagic').addEventListener('click', ()=> setCloudAuthMode('magic'));
+
+document.getElementById('forgotPasswordBtn').addEventListener('click', async ()=>{
+  if(!supabaseClient){ showToast('尚未連線到 Supabase'); return; }
+  const email = document.getElementById('cloudEmailInput').value.trim();
+  if(!email){ showToast('請先輸入 Email'); return; }
+  const redirectTo = window.location.origin + window.location.pathname;
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo });
+  if(error){ showToast('發送失敗：' + error.message); return; }
+  showToast('重設密碼信已寄出，請至信箱查看');
+});
+
+document.getElementById('cloudRecoverySubmitBtn').addEventListener('click', async ()=>{
+  if(!supabaseClient){ showToast('尚未連線到 Supabase'); return; }
+  const newPassword = document.getElementById('cloudNewPasswordInput').value;
+  if(!newPassword || newPassword.length < 6){ showToast('密碼至少 6 碼'); return; }
+  const btn = document.getElementById('cloudRecoverySubmitBtn');
+  btn.disabled = true;
+  try{
+    const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
+    if(error){ showToast('更新失敗：' + error.message); return; }
+    document.getElementById('cloudNewPasswordInput').value = '';
+    document.getElementById('cloudRecoveryView').style.display = 'none';
+    showToast('密碼已更新，你現在已經登入');
+    const { data } = await supabaseClient.auth.getSession();
+    if(data && data.session){
+      supabaseUser = data.session.user;
+      await afterLogin();
+    }
+  }catch(e){
+    showToast('發生錯誤：' + e.message);
+  }finally{
+    btn.disabled = false;
+  }
+});
+
+document.getElementById('cloudAuthSubmitBtn').addEventListener('click', async ()=>{
+  if(!supabaseClient){ showToast('尚未連線到 Supabase'); return; }
+  const email = document.getElementById('cloudEmailInput').value.trim();
+  const password = document.getElementById('cloudPasswordInput').value;
+
+  if(cloudAuthMode === 'magic'){
+    if(!email){ showToast('請輸入 Email'); return; }
+    const btn = document.getElementById('cloudAuthSubmitBtn');
+    btn.disabled = true;
+    try{
+      const redirectTo = window.location.origin + window.location.pathname;
+      const { error } = await supabaseClient.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: redirectTo }
+      });
+      if(error){ showToast('寄送失敗：' + error.message); return; }
+      showToast('登入連結已寄出，請至信箱收信並點擊連結');
+    }catch(e){
+      showToast('發生錯誤：' + e.message);
+    }finally{
+      btn.disabled = false;
+    }
+    return;
+  }
+
+  if(!email || !password){ showToast('請輸入 Email 和密碼'); return; }
+
+  const btn = document.getElementById('cloudAuthSubmitBtn');
+  btn.disabled = true;
+  try{
+    if(cloudAuthMode === 'signup'){
+      const { data, error } = await supabaseClient.auth.signUp({ email, password });
+      if(error){ showToast('註冊失敗：' + error.message); return; }
+      if(data.session){
+        supabaseUser = data.user;
+        await afterLogin();
+        showToast('註冊成功並已登入');
+      } else {
+        showToast('註冊成功！請至信箱收信完成驗證後再登入');
+      }
+    } else {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if(error){ showToast('登入失敗：' + error.message); return; }
+      supabaseUser = data.user;
+      await afterLogin();
+      showToast('已登入');
+    }
+  }catch(e){
+    showToast('發生錯誤：' + e.message);
+  }finally{
+    btn.disabled = false;
+  }
+});
+
+document.getElementById('cloudManualSyncBtn').addEventListener('click', async ()=>{
+  await pushToCloud(true);
+  showToast('已手動同步到雲端');
+});
+document.getElementById('cloudSignOutBtn').addEventListener('click', async ()=>{
+  if(supabaseClient){ await supabaseClient.auth.signOut(); }
+  supabaseUser = null;
+  if(realtimeChannel && supabaseClient){ supabaseClient.removeChannel(realtimeChannel); realtimeChannel = null; }
+  updateCloudStatusUI();
+  showToast('已登出');
+});
+// ---------- Read-only share links ----------
+let isShareView = false;
+let currentShareState = { token: null, enabled: false };
+
+function buildShareUrl(token){
+  const cfg = loadSupabaseConfig();
+  const base = window.location.origin + window.location.pathname;
+  const params = new URLSearchParams();
+  params.set('share', token);
+  params.set('su', cfg.url);
+  params.set('sk', cfg.anonKey);
+  return base + '?' + params.toString();
+}
+
+function updateShareUI(){
+  const box = document.getElementById('shareLinkBox');
+  const toggleBtn = document.getElementById('shareToggleBtn');
+  if(currentShareState.enabled && currentShareState.token){
+    toggleBtn.textContent = '停用分享連結';
+    box.style.display = 'block';
+    document.getElementById('shareLinkInput').value = buildShareUrl(currentShareState.token);
+  } else {
+    toggleBtn.textContent = '啟用分享連結';
+    box.style.display = 'none';
+  }
+}
+
+async function loadShareState(){
+  if(!supabaseClient || !supabaseUser) return;
+  const { data, error } = await supabaseClient
+    .from('app_state')
+    .select('share_token, share_enabled')
+    .eq('user_id', supabaseUser.id)
+    .maybeSingle();
+  if(error){ console.error('loadShareState error', error); return; }
+  currentShareState.token = (data && data.share_token) || null;
+  currentShareState.enabled = !!(data && data.share_enabled);
+  updateShareUI();
+}
+
+async function setShareState(enabled, regenerate){
+  if(!supabaseClient || !supabaseUser) return;
+  let token = currentShareState.token;
+  if(!token || regenerate){
+    token = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() :
+      'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c=>{
+        const r = Math.random()*16|0, v = c === 'x' ? r : (r&0x3|0x8);
+        return v.toString(16);
+      });
+  }
+  const { error } = await supabaseClient.from('app_state').upsert({
+    user_id: supabaseUser.id,
+    data: buildStateBlob(),
+    share_token: token,
+    share_enabled: enabled,
+    updated_at: new Date().toISOString()
+  });
+  if(error){ showToast('分享設定失敗：' + error.message); return; }
+  currentShareState.token = token;
+  currentShareState.enabled = enabled;
+  updateShareUI();
+}
+
+document.getElementById('shareToggleBtn').addEventListener('click', async ()=>{
+  if(currentShareState.enabled){
+    await setShareState(false, false);
+    showToast('已停用分享連結');
+  } else {
+    await setShareState(true, !currentShareState.token);
+    showToast('已啟用分享連結');
+  }
+});
+document.getElementById('shareCopyBtn').addEventListener('click', ()=>{
+  const input = document.getElementById('shareLinkInput');
+  input.select();
+  try{
+    document.execCommand('copy');
+    showToast('連結已複製');
+  }catch(e){
+    showToast('複製失敗，請手動選取複製');
+  }
+});
+document.getElementById('shareRegenBtn').addEventListener('click', async ()=>{
+  if(!confirm('重新產生連結後，舊的分享連結會立即失效，確定嗎？')) return;
+  await setShareState(true, true);
+  showToast('已產生新的分享連結');
+});
+
+// ---------- Share viewer mode (opened via ?share=...) ----------
+function lockdownUIForShareView(){
+  document.body.classList.add('share-view-mode');
+  document.getElementById('shareBanner').style.display = 'block';
+  const fab = document.getElementById('fabAdd');
+  if(fab) fab.style.display = 'none';
+  const backupBar = document.querySelector('.backup-bar');
+  if(backupBar) backupBar.style.display = 'none';
+}
+
+async function initShareViewer(){
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('share');
+  const su = params.get('su');
+  const sk = params.get('sk');
+  if(!token || !su || !sk){
+    showToast('分享連結格式不正確');
+    return;
+  }
+  isShareView = true;
+  lockdownUIForShareView();
+  if(!window.supabase || !window.supabase.createClient){
+    showToast('無法載入 Supabase 函式庫，請檢查網路連線');
+    return;
+  }
+  const viewerClient = window.supabase.createClient(su, sk);
+  const { data, error } = await viewerClient.rpc('get_shared_state', { p_token: token });
+  if(error || !data){
+    document.getElementById('shareBanner').textContent = '⚠ 此分享連結已失效，或對方已關閉分享';
+    renderAll();
+    return;
+  }
+  courses = data.courses || [];
+  allTags = data.tags || [];
+  tagColorMap = data.tagColorMap || {};
+  nextTagColorIndex = data.nextTagColorIndex || 0;
+  renderAll();
+}
+
+// ---------- Init ----------
+if(new URLSearchParams(window.location.search).has('share')){
+  initShareViewer();
+} else {
+loadCourses();
+loadAllTags();
+loadTagColors();
+seedIfEmpty();
+renderAll();
+if(initSupabaseClient()){
+  checkExistingSession();
+}
+}
+</script>
+</body>
+</html>
