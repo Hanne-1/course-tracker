@@ -611,6 +611,7 @@ select.filter-select{
   <button data-page="schedule">今日排程</button>
   <button data-page="list">課程清單</button>
   <button data-page="progress">課程進度</button>
+  <button data-page="calendar">📅 加入行事曆</button>
 </nav>
 
 <main>
@@ -676,6 +677,74 @@ select.filter-select{
     <div id="progTodo"></div>
     <div class="section-title">已完成 <span class="count-badge" id="progDoneCount">0</span></div>
     <div id="progDone"></div>
+  </section>
+
+  <!-- Calendar Reminder -->
+  <section class="page" id="page-calendar">
+    <div class="section-title">📅 設定行事曆提醒</div>
+
+    <div id="calendarLoggedOutNotice">
+      <div class="empty-state">
+        <span class="glyph">🔒</span>
+        <p>需要先登入雲端同步，才能使用行事曆提醒功能。</p>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-primary" id="calendarGotoLoginBtn">前往登入</button>
+      </div>
+    </div>
+
+    <div id="calendarLoggedInSection" style="display:none;">
+      <div class="checklist-box" style="margin-bottom:20px;">
+        <p class="field-hint" style="margin-bottom:10px;">已設定到期日或學習排程的課程，開啟訂閱後就會自動出現在手機日曆裡，提醒交給日曆 App 處理；沒設定的課程不會出現。新增課程後，日曆會在幾小時內自動跟上，不用手動重新匯出。</p>
+        <div class="modal-actions" style="margin-top:0;">
+          <button type="button" class="btn btn-secondary" id="calendarToggleBtn">啟用行事曆訂閱</button>
+        </div>
+        <div id="calendarLinkBox" style="display:none; margin-top:10px;">
+          <p class="field-hint" style="margin-bottom:8px;">你要用哪一種日曆？</p>
+          <div class="cloud-tab-row" style="margin-bottom:10px;">
+            <button type="button" id="calendarTabIOS">Apple 日曆</button>
+            <button type="button" id="calendarTabGoogle">Google 日曆</button>
+          </div>
+          <div id="calendarPlatformDetail" style="display:none;">
+            <input type="text" id="calendarLinkInput" readonly style="width:100%; padding:9px 11px; border:1px solid rgba(55,53,47,0.12); border-radius:9px; font-family:inherit; font-size:12px; background:var(--cream); color:var(--medium); margin-bottom:8px;">
+            <div class="modal-actions" style="margin-top:0;">
+              <button type="button" class="btn btn-secondary" id="calendarCopyBtn">複製連結</button>
+            </div>
+            <p class="field-hint" id="calendarHintIOS" style="margin-top:8px;">
+              直接點上面複製好的連結，會自動跳出「加入日曆」的視窗，按確認即可。
+            </p>
+            <p class="field-hint" id="calendarHintGoogle" style="display:none; margin-top:8px;">
+              電腦開 calendar.google.com → 左側「其他日曆」旁的 + → 「透過網址訂閱」→ 把連結貼上 → 新增日曆。手機會自動同步顯示。
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">使用教學</div>
+      <div class="checklist-box">
+        <div class="collapsible-field-divider">第一步：啟用訂閱連結</div>
+        <p class="field-hint" style="margin-bottom:14px; line-height:1.7;">
+          點上面的「啟用行事曆訂閱」，複製產生的連結。
+        </p>
+
+        <div class="collapsible-field-divider">第二步：加入手機日曆</div>
+        <div class="cloud-tab-row" style="margin-bottom:10px;">
+          <button type="button" class="active" id="tutorialTabIOS">Apple 日曆</button>
+          <button type="button" id="tutorialTabGoogle">Google 日曆</button>
+        </div>
+        <p class="field-hint" id="tutorialHintIOS" style="margin-bottom:14px; line-height:1.7;">
+          把連結貼到 Safari 網址列打開（或在備忘錄／訊息裡點一下），會自動跳出「訂閱這個行事曆嗎？」的視窗，按「訂閱」即可。之後打開「日曆」App 就能看到。
+        </p>
+        <p class="field-hint" id="tutorialHintGoogle" style="display:none; margin-bottom:14px; line-height:1.7;">
+          電腦開 calendar.google.com → 左側「其他日曆」旁的 + → 「透過網址訂閱」→ 把連結貼上，並把開頭 webcal:// 改成 https:// → 新增日曆。手機上的 Google 日曆 App 會自動同步顯示，不用再另外設定。
+        </p>
+
+        <div class="collapsible-field-divider">第三步：設定提醒時間</div>
+        <p class="field-hint" style="margin-bottom:0; line-height:1.7;">
+          提醒方式、提前多久提醒（前 10 分鐘、前一天都行），都是在手機日曆本身的設定裡調整，跟設定其他行事曆活動一樣。日曆通常每幾小時自動刷新一次，新增課程後不會馬上出現，但幾小時內會自動跟上。
+        </p>
+      </div>
+    </div>
   </section>
 
 </main>
@@ -814,7 +883,7 @@ select.filter-select{
 <!-- Cloud Sync Modal -->
 <div class="modal-overlay" id="cloudModalOverlay">
   <div class="modal">
-    <h2>☁️ 雲端同步設定</h2>
+    <h2>☁️ 雲端同步</h2>
 
     <div id="cloudStep1">
       <p class="field-hint" style="margin-bottom:14px; line-height:1.6;">
@@ -942,21 +1011,6 @@ grant execute on function get_shared_state(uuid) to anon;</pre>
             <div class="modal-actions">
               <button type="button" class="btn btn-secondary" id="shareCopyBtn">複製連結</button>
               <button type="button" class="btn btn-secondary" id="shareRegenBtn">重新產生連結</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="field" style="margin-top:10px;">
-          <label>行事曆訂閱</label>
-          <p class="field-hint" style="margin-bottom:10px;">訂閱後，到期日和固定上課時間會自動出現在手機日曆裡，提醒交給日曆 App 處理；新增課程後，日曆會在幾小時內自動跟上，不用手動重新匯出。</p>
-          <div class="modal-actions" style="margin-top:0;">
-            <button type="button" class="btn btn-secondary" id="calendarToggleBtn">啟用行事曆訂閱</button>
-          </div>
-          <div id="calendarLinkBox" style="display:none; margin-top:10px;">
-            <input type="text" id="calendarLinkInput" readonly style="width:100%; padding:9px 11px; border:1px solid rgba(55,53,47,0.12); border-radius:9px; font-family:inherit; font-size:12px; background:var(--cream); color:var(--medium);">
-            <div class="modal-actions">
-              <button type="button" class="btn btn-secondary" id="calendarCopyBtn">複製連結</button>
-              <button type="button" class="btn btn-secondary" id="calendarRegenBtn">重新產生連結</button>
             </div>
           </div>
         </div>
@@ -1132,11 +1186,12 @@ function computeProgressFromItems(items){
 }
 
 // ---------- Toast ----------
-function showToast(msg){
+function showToast(msg, duration){
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 1800);
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(()=>t.classList.remove('show'), duration || 1800);
 }
 
 // ---------- Nav ----------
@@ -2419,6 +2474,13 @@ function initSupabaseClient(){
   return supabaseClient;
 }
 
+function stableStringify(obj){
+  if(obj === null || typeof obj !== 'object') return JSON.stringify(obj);
+  if(Array.isArray(obj)) return '[' + obj.map(stableStringify).join(',') + ']';
+  const keys = Object.keys(obj).sort();
+  return '{' + keys.map(k => JSON.stringify(k) + ':' + stableStringify(obj[k])).join(',') + '}';
+}
+
 function buildStateBlob(){
   return { courses, tags: allTags, tagColorMap, nextTagColorIndex };
 }
@@ -2507,20 +2569,34 @@ async function pullFromCloudAndResolve(){
   const hasRealLocalChange = !!localStorage.getItem(LAST_LOCAL_CHANGE_KEY);
 
   if(cloudHasData && hasRealLocalChange){
-    // Auto-resolve by comparing timestamps: whichever side was modified more recently wins.
-    // The side that loses is downloaded as a safety-backup JSON first, so nothing is truly lost.
-    const localTs = new Date(localStorage.getItem(LAST_LOCAL_CHANGE_KEY) || '1970-01-01T00:00:00.000Z');
-    const cloudTs = new Date(data.updated_at || '1970-01-01T00:00:00.000Z');
+    // First check whether the two sides are actually different at all — if local and cloud
+    // already hold the same content, there's nothing to resolve and no reason to download
+    // a "safety backup" every single login.
+    const localBlob = buildStateBlob();
+    const contentIsSame = stableStringify(localBlob) === stableStringify(data.data);
 
-    if(cloudTs > localTs){
-      downloadJSONBackup(buildStateBlob(), 'local');
-      applyStateBlob(data.data);
-      renderAll();
-      showToast('已改用雲端的資料（電腦這台原本的內容，已自動存成備份檔，以防萬一）');
+    if(contentIsSame){
+      // Already in sync — nothing to do, no backup, no toast.
     } else {
-      downloadJSONBackup(data.data, 'cloud');
-      await pushToCloud(true);
-      showToast('已改用這台電腦的資料（雲端原本的內容，已自動存成備份檔，以防萬一）');
+      // Auto-resolve by comparing timestamps: whichever side was modified more recently wins.
+      // Ask before downloading a backup — don't force a download on every genuine difference.
+      const localTs = new Date(localStorage.getItem(LAST_LOCAL_CHANGE_KEY) || '1970-01-01T00:00:00.000Z');
+      const cloudTs = new Date(data.updated_at || '1970-01-01T00:00:00.000Z');
+
+      if(cloudTs > localTs){
+        if(confirm('系統偵測到雲端與您本機的資料有不同的更動，接下來會改用雲端的版本。是否要下載本機資料備份，以防萬一？')){
+          downloadJSONBackup(localBlob, 'local');
+        }
+        applyStateBlob(data.data);
+        renderAll();
+        showToast('已改用雲端的資料');
+      } else {
+        if(confirm('系統偵測到雲端與您本機的資料有不同的更動，接下來會改用本機的版本。是否要下載雲端資料備份，以防萬一？')){
+          downloadJSONBackup(data.data, 'cloud');
+        }
+        await pushToCloud(true);
+        showToast('已改用這台電腦的資料');
+      }
     }
   } else if(cloudHasData){
     applyStateBlob(data.data);
@@ -2592,6 +2668,13 @@ async function afterLogin(){
   subscribeRealtime();
   await loadShareState();
   await loadCalendarState();
+  updateCalendarPageVisibility();
+}
+
+function updateCalendarPageVisibility(){
+  const loggedIn = !!supabaseUser;
+  document.getElementById('calendarLoggedOutNotice').style.display = loggedIn ? 'none' : 'block';
+  document.getElementById('calendarLoggedInSection').style.display = loggedIn ? 'block' : 'none';
 }
 
 async function checkExistingSession(){
@@ -2627,6 +2710,7 @@ function closeCloudModal(){
 }
 
 document.getElementById('cloudSyncBtn').addEventListener('click', openCloudModal);
+document.getElementById('calendarGotoLoginBtn').addEventListener('click', openCloudModal);
 document.getElementById('cloudCloseBtn1').addEventListener('click', closeCloudModal);
 document.getElementById('cloudCloseBtn2').addEventListener('click', closeCloudModal);
 document.getElementById('cloudModalOverlay').addEventListener('click', (e)=>{
@@ -2776,7 +2860,8 @@ document.getElementById('cloudSignOutBtn').addEventListener('click', async ()=>{
   // pullFromCloudAndResolve() detects the account mismatch and starts that account fresh
   // instead of inheriting this data; logging back into the *same* account syncs normally.
   updateCloudStatusUI();
-  showToast('已登出');
+  updateCalendarPageVisibility();
+  showToast('您已登出雲端，目前是本機模式，仍可編輯資料，但只留在這台裝置，且只有你自己看得到，不會同步到雲端，也無法產生連結分享給別人。', 6000);
 });
 // ---------- Read-only share links ----------
 let isShareView = false;
@@ -2867,21 +2952,36 @@ document.getElementById('shareRegenBtn').addEventListener('click', async ()=>{
 let currentCalendarState = { token: null, enabled: false };
 const CALENDAR_FUNCTION_URL = HARDCODED_SUPABASE_URL + '/functions/v1/smart-worker';
 
-function buildCalendarUrl(token){
+function buildCalendarUrl(token, platform){
   const httpsUrl = `${CALENDAR_FUNCTION_URL}?token=${token}`;
-  return httpsUrl.replace(/^https:\/\//, 'webcal://');
+  return platform === 'ios' ? httpsUrl.replace(/^https:\/\//, 'webcal://') : httpsUrl;
+}
+
+let calendarSelectedPlatform = null; // null | 'ios' | 'google'
+
+function selectCalendarPlatform(platform){
+  calendarSelectedPlatform = platform;
+  document.getElementById('calendarTabIOS').classList.toggle('active', platform === 'ios');
+  document.getElementById('calendarTabGoogle').classList.toggle('active', platform === 'google');
+  document.getElementById('calendarHintIOS').style.display = platform === 'ios' ? 'block' : 'none';
+  document.getElementById('calendarHintGoogle').style.display = platform === 'google' ? 'block' : 'none';
+  document.getElementById('calendarPlatformDetail').style.display = platform ? 'block' : 'none';
+  if(platform && currentCalendarState.token){
+    document.getElementById('calendarLinkInput').value = buildCalendarUrl(currentCalendarState.token, platform);
+  }
 }
 
 function updateCalendarUI(){
   const box = document.getElementById('calendarLinkBox');
   const toggleBtn = document.getElementById('calendarToggleBtn');
   if(currentCalendarState.enabled && currentCalendarState.token){
-    toggleBtn.textContent = '停用行事曆訂閱';
+    toggleBtn.textContent = '停用行事曆提醒';
     box.style.display = 'block';
-    document.getElementById('calendarLinkInput').value = buildCalendarUrl(currentCalendarState.token);
+    selectCalendarPlatform(calendarSelectedPlatform);
   } else {
     toggleBtn.textContent = '啟用行事曆訂閱';
     box.style.display = 'none';
+    selectCalendarPlatform(null);
   }
 }
 
@@ -2924,10 +3024,10 @@ async function setCalendarState(enabled, regenerate){
 document.getElementById('calendarToggleBtn').addEventListener('click', async ()=>{
   if(currentCalendarState.enabled){
     await setCalendarState(false, false);
-    showToast('已停用行事曆訂閱');
+    showToast('已停用行事曆提醒');
   } else {
     await setCalendarState(true, !currentCalendarState.token);
-    showToast('已啟用行事曆訂閱');
+    showToast('已啟用行事曆提醒');
   }
 });
 document.getElementById('calendarCopyBtn').addEventListener('click', ()=>{
@@ -2940,10 +3040,21 @@ document.getElementById('calendarCopyBtn').addEventListener('click', ()=>{
     showToast('複製失敗，請手動選取複製');
   }
 });
-document.getElementById('calendarRegenBtn').addEventListener('click', async ()=>{
-  if(!confirm('重新產生連結後，舊的行事曆訂閱連結會立即失效，確定嗎？')) return;
-  await setCalendarState(true, true);
-  showToast('已產生新的行事曆訂閱連結');
+
+document.getElementById('calendarTabIOS').addEventListener('click', ()=> selectCalendarPlatform('ios'));
+document.getElementById('calendarTabGoogle').addEventListener('click', ()=> selectCalendarPlatform('google'));
+
+document.getElementById('tutorialTabIOS').addEventListener('click', ()=>{
+  document.getElementById('tutorialTabIOS').classList.add('active');
+  document.getElementById('tutorialTabGoogle').classList.remove('active');
+  document.getElementById('tutorialHintIOS').style.display = 'block';
+  document.getElementById('tutorialHintGoogle').style.display = 'none';
+});
+document.getElementById('tutorialTabGoogle').addEventListener('click', ()=>{
+  document.getElementById('tutorialTabGoogle').classList.add('active');
+  document.getElementById('tutorialTabIOS').classList.remove('active');
+  document.getElementById('tutorialHintGoogle').style.display = 'block';
+  document.getElementById('tutorialHintIOS').style.display = 'none';
 });
 
 // ---------- Share viewer mode (opened via ?share=...) ----------
