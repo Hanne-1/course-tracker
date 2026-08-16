@@ -581,6 +581,8 @@ select.filter-select{
   background:#fff; color:var(--medium); font-family:inherit; font-weight:700; font-size:12.5px; cursor:pointer;
 }
 .cloud-tab-row button.active{ background:var(--lavender); color:#fff; border-color:var(--lavender); }
+#calendarAutoAddBtn.platform-ios{ background:var(--dark); }
+#calendarAutoAddBtn.platform-google{ background:var(--blue); }
 .share-banner{
   background:var(--light-lavender-hover); color:var(--lavender); text-align:center;
   font-size:12.5px; font-weight:700; padding:9px 16px;
@@ -697,7 +699,7 @@ select.filter-select{
       <div class="checklist-box" style="margin-bottom:20px;">
         <p class="field-hint" style="margin-bottom:10px;">已設定到期日或學習排程的課程，開啟訂閱後就會自動出現在手機日曆裡，提醒交給日曆 App 處理；沒設定的課程不會出現。新增課程後，日曆會在幾小時內自動跟上，不用手動重新匯出。</p>
         <div class="modal-actions" style="margin-top:0;">
-          <button type="button" class="btn btn-secondary" id="calendarToggleBtn">啟用行事曆訂閱</button>
+          <button type="button" class="btn btn-secondary" id="calendarToggleBtn">啟用行事曆提醒</button>
         </div>
         <div id="calendarLinkBox" style="display:none; margin-top:10px;">
           <p class="field-hint" style="margin-bottom:8px;">你要用哪一種日曆？</p>
@@ -706,38 +708,31 @@ select.filter-select{
             <button type="button" id="calendarTabGoogle">Google 日曆</button>
           </div>
           <div id="calendarPlatformDetail" style="display:none;">
-            <input type="text" id="calendarLinkInput" readonly style="width:100%; padding:9px 11px; border:1px solid rgba(55,53,47,0.12); border-radius:9px; font-family:inherit; font-size:12px; background:var(--cream); color:var(--medium); margin-bottom:8px;">
-            <div class="modal-actions" style="margin-top:0;">
-              <button type="button" class="btn btn-primary" id="calendarAutoAddBtn">點此自動加入日曆</button>
-              <button type="button" class="btn btn-secondary" id="calendarCopyBtn">複製連結</button>
-            </div>
-            <p class="field-hint" id="calendarHintIOS" style="margin-top:8px;">
-              點「點此自動加入日曆」會直接跳出「訂閱這個行事曆嗎？」的視窗，按確認即可，不用手動複製貼上。
-            </p>
-            <p class="field-hint" id="calendarHintGoogle" style="display:none; margin-top:8px;">
-              點「點此自動加入日曆」會開新分頁跳到 Google 日曆，直接跳出訂閱確認畫面，按「新增」即可。手機上的 Google 日曆 App 會自動同步顯示。
-            </p>
+            <button type="button" class="btn btn-primary" id="calendarAutoAddBtn" style="width:100%;">點此自動加入行事曆</button>
           </div>
         </div>
       </div>
 
-      <div class="section-title">使用教學</div>
+      <div class="section-title">手動加入或自動加入失敗？</div>
       <div class="checklist-box">
         <div class="collapsible-field-divider">第一步：啟用訂閱連結</div>
         <p class="field-hint" style="margin-bottom:14px; line-height:1.7;">
-          點上面的「啟用行事曆訂閱」，複製產生的連結。
+          點上面的「啟用行事曆提醒」，選擇你的日曆種類，再點「點此自動加入行事曆」。
         </p>
 
         <div class="collapsible-field-divider">第二步：加入手機日曆</div>
+        <p class="field-hint" style="margin-bottom:10px; line-height:1.7;">
+          如果自動加入沒有反應，點下面對應的按鈕複製連結，改用手動的方式加入：
+        </p>
         <div class="cloud-tab-row" style="margin-bottom:10px;">
-          <button type="button" class="active" id="tutorialTabIOS">Apple 日曆</button>
+          <button type="button" id="tutorialTabIOS">Apple 日曆</button>
           <button type="button" id="tutorialTabGoogle">Google 日曆</button>
         </div>
-        <p class="field-hint" id="tutorialHintIOS" style="margin-bottom:14px; line-height:1.7;">
-          點上面「你要用哪一種日曆？」選 Apple 日曆，再點「點此自動加入日曆」，會直接跳出「訂閱這個行事曆嗎？」的視窗，按「訂閱」即可。之後打開「日曆」App 就能看到。
+        <p class="field-hint" id="tutorialHintIOS" style="display:none; margin-bottom:14px; line-height:1.7;">
+          已複製 Apple 日曆的訂閱連結。打開 Safari，貼到網址列按 Enter（或貼在備忘錄／訊息裡點一下），會跳出「訂閱這個行事曆嗎？」的視窗，按「訂閱」即可。之後打開「日曆」App 就能看到。
         </p>
         <p class="field-hint" id="tutorialHintGoogle" style="display:none; margin-bottom:14px; line-height:1.7;">
-          點上面「你要用哪一種日曆？」選 Google 日曆，再點「點此自動加入日曆」，會直接跳到 Google 日曆的訂閱確認畫面，按「新增」即可。手機上的 Google 日曆 App 會自動同步顯示，不用再另外設定。
+          已複製 Google 日曆的訂閱連結。電腦開 calendar.google.com → 左側「其他日曆」旁的 + → 「透過網址訂閱」→ 貼上連結 → 新增日曆。手機上的 Google 日曆 App 會自動同步顯示。
         </p>
 
         <div class="collapsible-field-divider">第三步：設定提醒時間</div>
@@ -795,15 +790,25 @@ select.filter-select{
           </div>
           <div class="schedule-add-row" style="margin-bottom:0;">
             <div style="flex:1 1 auto;">
-              <label for="courseDurationValue" class="field-hint" style="margin-bottom:4px; display:block;">總課程時長（選填）</label>
-              <input type="number" id="courseDurationValue" min="0" step="0.5" placeholder="例如：12" style="width:100%; padding:9px 11px; border:1px solid rgba(55,53,47,0.12); border-radius:9px; font-family:inherit; font-size:13px; background:#fff; color:var(--dark);">
-            </div>
-            <div style="flex:0 0 auto; align-self:flex-end;">
-              <select id="courseDurationUnit" style="padding:9px 11px; border:1px solid rgba(55,53,47,0.12); border-radius:9px; font-family:inherit; font-size:13px; background:#fff; color:var(--dark);">
-                <option value="分鐘">分鐘</option>
-                <option value="小時" selected>小時</option>
-                <option value="天">天</option>
-              </select>
+              <label class="field-hint" style="margin-bottom:4px; display:block;">總課程時長（選填）</label>
+              <div style="display:flex; gap:6px;">
+                <div style="flex:1; text-align:center;">
+                  <input type="number" id="courseDurationDays" min="0" placeholder="0" style="width:100%; box-sizing:border-box; padding:9px 6px; border:1px solid rgba(55,53,47,0.12); border-radius:9px; font-family:inherit; font-size:13px; background:#fff; color:var(--dark); text-align:center;">
+                  <span class="field-hint" style="display:block; margin-top:2px;">天</span>
+                </div>
+                <div style="flex:1; text-align:center;">
+                  <input type="number" id="courseDurationHours" min="0" placeholder="0" style="width:100%; box-sizing:border-box; padding:9px 6px; border:1px solid rgba(55,53,47,0.12); border-radius:9px; font-family:inherit; font-size:13px; background:#fff; color:var(--dark); text-align:center;">
+                  <span class="field-hint" style="display:block; margin-top:2px;">時</span>
+                </div>
+                <div style="flex:1; text-align:center;">
+                  <input type="number" id="courseDurationMinutes" min="0" placeholder="0" style="width:100%; box-sizing:border-box; padding:9px 6px; border:1px solid rgba(55,53,47,0.12); border-radius:9px; font-family:inherit; font-size:13px; background:#fff; color:var(--dark); text-align:center;">
+                  <span class="field-hint" style="display:block; margin-top:2px;">分</span>
+                </div>
+                <div style="flex:1; text-align:center;">
+                  <input type="number" id="courseDurationSeconds" min="0" placeholder="0" style="width:100%; box-sizing:border-box; padding:9px 6px; border:1px solid rgba(55,53,47,0.12); border-radius:9px; font-family:inherit; font-size:13px; background:#fff; color:var(--dark); text-align:center;">
+                  <span class="field-hint" style="display:block; margin-top:2px;">秒</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1060,11 +1065,31 @@ function scheduleOccursOn(s, dateStr, weekday){
 function displayName(c){
   return (c.alias && c.alias.trim()) ? c.alias.trim() : c.name;
 }
-function parseDurationString(str){
-  if(!str) return { value: '', unit: '小時' };
-  const match = String(str).trim().match(/^([\d.]+)\s*(分鐘|小時|天)?/);
-  if(!match) return { value: '', unit: '小時' };
-  return { value: match[1], unit: match[2] || '小時' };
+function formatDurationObj(dur){
+  if(!dur) return '';
+  if(typeof dur === 'string') return dur; // backward-compat with old free-text durations
+  const parts = [];
+  if(dur.d) parts.push(dur.d + ' 天');
+  if(dur.h) parts.push(dur.h + ' 時');
+  if(dur.m) parts.push(dur.m + ' 分');
+  if(dur.s) parts.push(dur.s + ' 秒');
+  return parts.join(' ');
+}
+function parseDurationForEdit(dur){
+  if(!dur) return { d:'', h:'', m:'', s:'' };
+  if(typeof dur === 'string'){
+    // best-effort parse of old "12 小時" style strings into the closest field
+    const match = dur.trim().match(/^([\d.]+)\s*(分鐘|小時|天)?/);
+    if(match){
+      const val = match[1];
+      const unit = match[2] || '小時';
+      if(unit === '天') return { d:val, h:'', m:'', s:'' };
+      if(unit === '分鐘') return { d:'', h:'', m:val, s:'' };
+      return { d:'', h:val, m:'', s:'' };
+    }
+    return { d:'', h:'', m:'', s:'' };
+  }
+  return { d: dur.d || '', h: dur.h || '', m: dur.m || '', s: dur.s || '' };
 }
 
 // ---------- Data ----------
@@ -1235,7 +1260,8 @@ function courseCardHTML(c){
     const color = tagColor(t);
     return `<span class="tag-badge" style="background:${color.bg}; color:${color.fg};">${escapeHTML(t)}</span>`;
   }).join('');
-  const durationBadge = c.duration ? `<span class="duration-badge">⏱ ${escapeHTML(c.duration)}</span>` : '';
+  const durationText = formatDurationObj(c.duration);
+  const durationBadge = durationText ? `<span class="duration-badge">⏱ ${escapeHTML(durationText)}</span>` : '';
 
   return `
   <div class="course-card" data-id="${c.id}">
@@ -1640,7 +1666,7 @@ function progressItemHTML(c){
     <div class="progress-item-header" data-toggle-id="${c.id}">
       <button type="button" class="chevron-btn">▸</button>
       <div class="pi-name">${escapeHTML(c.name)}</div>
-      ${c.duration ? `<span class="duration-badge">⏱ ${escapeHTML(c.duration)}</span>` : ''}
+      ${formatDurationObj(c.duration) ? `<span class="duration-badge">⏱ ${escapeHTML(formatDurationObj(c.duration))}</span>` : ''}
       <span class="status-tag ${tagClass}">${tagText}</span>
       <div class="pi-progress-mini">
         <div class="progress-track"><div class="progress-fill" style="width:${c.progress}%"></div></div>
@@ -2242,7 +2268,11 @@ function openModal(id){
     document.getElementById('courseAlias').value = c.alias || '';
     document.getElementById('startDate').value = c.startDate || '';
     document.getElementById('dueDate').value = c.dueDate || '';
-    { const d = parseDurationString(c.duration); document.getElementById('courseDurationValue').value = d.value; document.getElementById('courseDurationUnit').value = d.unit; }
+    { const d = parseDurationForEdit(c.duration);
+      document.getElementById('courseDurationDays').value = d.d;
+      document.getElementById('courseDurationHours').value = d.h;
+      document.getElementById('courseDurationMinutes').value = d.m;
+      document.getElementById('courseDurationSeconds').value = d.s; }
     document.getElementById('progressFallback').value = c.progress;
     document.getElementById('courseNote').value = c.note || '';
     document.getElementById('courseLoginUrl').value = c.loginUrl || '';
@@ -2293,7 +2323,13 @@ document.getElementById('courseForm').addEventListener('submit', (e)=>{
     alias: document.getElementById('courseAlias').value.trim(),
     startDate: document.getElementById('startDate').value,
     dueDate: document.getElementById('dueDate').value,
-    duration: (()=>{ const v = document.getElementById('courseDurationValue').value.trim(); return v ? `${v} ${document.getElementById('courseDurationUnit').value}` : ''; })(),
+    duration: (()=>{
+      const d = parseInt(document.getElementById('courseDurationDays').value, 10) || 0;
+      const h = parseInt(document.getElementById('courseDurationHours').value, 10) || 0;
+      const m = parseInt(document.getElementById('courseDurationMinutes').value, 10) || 0;
+      const s = parseInt(document.getElementById('courseDurationSeconds').value, 10) || 0;
+      return (d || h || m || s) ? { d, h, m, s } : '';
+    })(),
     progress: computed !== null ? computed : (parseInt(document.getElementById('progressFallback').value, 10) || 0),
     note: document.getElementById('courseNote').value.trim(),
     loginUrl: document.getElementById('courseLoginUrl').value.trim(),
@@ -2978,12 +3014,10 @@ function selectCalendarPlatform(platform){
   calendarSelectedPlatform = platform;
   document.getElementById('calendarTabIOS').classList.toggle('active', platform === 'ios');
   document.getElementById('calendarTabGoogle').classList.toggle('active', platform === 'google');
-  document.getElementById('calendarHintIOS').style.display = platform === 'ios' ? 'block' : 'none';
-  document.getElementById('calendarHintGoogle').style.display = platform === 'google' ? 'block' : 'none';
   document.getElementById('calendarPlatformDetail').style.display = platform ? 'block' : 'none';
-  if(platform && currentCalendarState.token){
-    document.getElementById('calendarLinkInput').value = buildCalendarUrl(currentCalendarState.token, platform);
-  }
+  const autoBtn = document.getElementById('calendarAutoAddBtn');
+  autoBtn.classList.toggle('platform-ios', platform === 'ios');
+  autoBtn.classList.toggle('platform-google', platform === 'google');
 }
 
 function updateCalendarUI(){
@@ -2994,7 +3028,7 @@ function updateCalendarUI(){
     box.style.display = 'block';
     selectCalendarPlatform(calendarSelectedPlatform);
   } else {
-    toggleBtn.textContent = '啟用行事曆訂閱';
+    toggleBtn.textContent = '啟用行事曆提醒';
     box.style.display = 'none';
     selectCalendarPlatform(null);
   }
@@ -3045,16 +3079,6 @@ document.getElementById('calendarToggleBtn').addEventListener('click', async ()=
     showToast('已啟用行事曆提醒');
   }
 });
-document.getElementById('calendarCopyBtn').addEventListener('click', ()=>{
-  const input = document.getElementById('calendarLinkInput');
-  input.select();
-  try{
-    document.execCommand('copy');
-    showToast('連結已複製');
-  }catch(e){
-    showToast('複製失敗，請手動選取複製');
-  }
-});
 
 document.getElementById('calendarAutoAddBtn').addEventListener('click', ()=>{
   if(!currentCalendarState.token) return;
@@ -3068,18 +3092,44 @@ document.getElementById('calendarAutoAddBtn').addEventListener('click', ()=>{
 document.getElementById('calendarTabIOS').addEventListener('click', ()=> selectCalendarPlatform('ios'));
 document.getElementById('calendarTabGoogle').addEventListener('click', ()=> selectCalendarPlatform('google'));
 
-document.getElementById('tutorialTabIOS').addEventListener('click', ()=>{
-  document.getElementById('tutorialTabIOS').classList.add('active');
-  document.getElementById('tutorialTabGoogle').classList.remove('active');
-  document.getElementById('tutorialHintIOS').style.display = 'block';
-  document.getElementById('tutorialHintGoogle').style.display = 'none';
-});
-document.getElementById('tutorialTabGoogle').addEventListener('click', ()=>{
-  document.getElementById('tutorialTabGoogle').classList.add('active');
-  document.getElementById('tutorialTabIOS').classList.remove('active');
-  document.getElementById('tutorialHintGoogle').style.display = 'block';
-  document.getElementById('tutorialHintIOS').style.display = 'none';
-});
+function tutorialCopyAndShow(platform){
+  document.getElementById('tutorialTabIOS').classList.toggle('active', platform === 'ios');
+  document.getElementById('tutorialTabGoogle').classList.toggle('active', platform === 'google');
+  document.getElementById('tutorialHintIOS').style.display = platform === 'ios' ? 'block' : 'none';
+  document.getElementById('tutorialHintGoogle').style.display = platform === 'google' ? 'block' : 'none';
+
+  if(!currentCalendarState.token){
+    showToast('請先在上面啟用行事曆提醒');
+    return;
+  }
+  const link = buildCalendarUrl(currentCalendarState.token, platform);
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(link).then(()=>{
+      showToast('連結已複製');
+    }).catch(()=>{
+      copyViaFallback(link);
+    });
+  } else {
+    copyViaFallback(link);
+  }
+}
+function copyViaFallback(text){
+  const tmp = document.createElement('textarea');
+  tmp.value = text;
+  tmp.style.position = 'fixed';
+  tmp.style.opacity = '0';
+  document.body.appendChild(tmp);
+  tmp.select();
+  try{
+    document.execCommand('copy');
+    showToast('連結已複製');
+  }catch(e){
+    showToast('複製失敗，請重試');
+  }
+  document.body.removeChild(tmp);
+}
+document.getElementById('tutorialTabIOS').addEventListener('click', ()=> tutorialCopyAndShow('ios'));
+document.getElementById('tutorialTabGoogle').addEventListener('click', ()=> tutorialCopyAndShow('google'));
 
 // ---------- Share viewer mode (opened via ?share=...) ----------
 function lockdownUIForShareView(){
