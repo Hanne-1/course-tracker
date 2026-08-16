@@ -203,6 +203,21 @@ main{max-width:960px; margin:0 auto; padding:22px 20px 40px;}
   display:flex; align-items:center; justify-content:center; transition:transform .2s;
 }
 .progress-item.expanded .chevron-btn{ transform:rotate(90deg); }
+.collapsible-field-header{
+  display:flex; align-items:center; gap:8px; cursor:pointer; margin-bottom:8px;
+}
+.collapsible-field-header label{ cursor:pointer; margin-bottom:0 !important; }
+.collapsible-field-header .chevron-btn.expanded{ transform:rotate(90deg); }
+.collapsible-field-divider{
+  display:flex; align-items:center; gap:8px; font-size:12px; font-weight:700; color:var(--medium);
+  margin:14px 0 10px;
+}
+.collapsible-field-divider::before, .collapsible-field-divider::after{
+  content:""; flex:1; height:1px; background:rgba(55,53,47,0.08);
+}
+.button-help-text{
+  font-size:11.5px; color:var(--gray); line-height:1.6; margin-top:8px;
+}
 .pi-name{ flex:1; font-size:14.5px; font-weight:700; color:var(--dark); min-width:0;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .pi-progress-mini{ display:flex; align-items:center; gap:6px; width:90px; flex-shrink:0; }
@@ -389,7 +404,11 @@ select.filter-select{
   cursor:pointer; text-decoration:underline; padding:6px 0 0; margin-top:2px;
 }
 .tag-manage-link:hover{ color:var(--lavender); }
-.tag-manage-list{ display:flex; flex-direction:column; gap:6px; margin-top:8px; }
+.tag-manage-list{
+  display:flex; flex-direction:column; gap:6px; margin-top:8px;
+  background:var(--cream); border-radius:12px; padding:12px;
+}
+.tag-manage-list:empty{ display:none; }
 .tag-manage-row{
   display:flex; align-items:center; gap:8px; background:#fff; border-radius:9px;
   padding:6px 8px; border:1px solid rgba(55,53,47,0.06);
@@ -438,6 +457,7 @@ select.filter-select{
 }
 .checklist-bulk textarea:focus{outline:none; border-color:var(--soft-blue);}
 .checklist-bulk-row{display:flex; justify-content:flex-end; margin-top:6px;}
+.bulk-btn-group{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
 .checklist-bulk-row button{
   padding:8px 14px; border-radius:10px; border:none; background:var(--blue); color:#fff;
   font-family:inherit; font-weight:700; font-size:12.5px; cursor:pointer;
@@ -606,7 +626,7 @@ select.filter-select{
     <div class="section-title">🔥 優先完成課程（進度達 60%）<span class="count-badge" id="priorityCount">0</span></div>
     <div id="priorityContainer"></div>
 
-    <div class="section-title">即將到期</div>
+    <div class="section-title">⏰ 即將到期（到期前 10 天）</div>
     <div id="dashboardSoon"></div>
   </section>
 
@@ -673,7 +693,7 @@ select.filter-select{
         <input type="text" id="courseName" required placeholder="例如：進階塔羅牌陣解讀">
       </div>
       <div class="field">
-        <label for="courseAlias">代稱（選填，用於日期排程等空間較小處顯示）</label>
+        <label for="courseAlias">簡稱（選填，用於日期排程等空間較小處顯示）</label>
         <input type="text" id="courseAlias" placeholder="例如：塔羅進階">
       </div>
       <div class="field">
@@ -688,46 +708,36 @@ select.filter-select{
         <div class="tag-manage-list" id="tagManageList" style="display:none;"></div>
       </div>
       <div class="field">
-        <label for="startDate">開始上課日期</label>
-        <input type="date" id="startDate">
-      </div>
-      <div class="field">
-        <label for="dueDate">到期日</label>
-        <input type="date" id="dueDate">
-      </div>
-      <div class="field">
-        <label for="courseDuration">總課程時長（選填）</label>
-        <input type="text" id="courseDuration" placeholder="例如：12 小時">
-      </div>
-      <div class="field">
-        <label for="progressRange">課程進度<span id="progressModeHint" class="field-hint" style="display:none;">（已切換為由章節自動計算，滑桿已停用）</span></label>
-        <input type="range" id="progressRange" min="0" max="100" value="0">
-        <div class="range-value"><span id="progressLabel">0</span>%</div>
-      </div>
-      <div class="field">
-        <label>課程章節</label>
-        <div class="checklist-box">
-          <div class="checklist-bulk">
-            <textarea id="bulkItemInput" placeholder="填入課程大綱"></textarea>
-            <div class="checklist-bulk-row">
-              <button type="button" id="bulkAddBtn">課程項目新增</button>
+        <div class="collapsible-field-header" id="courseTimeToggle">
+          <button type="button" class="chevron-btn" id="courseTimeChevron">▸</button>
+          <label>課程時間和學習排程</label>
+        </div>
+        <div class="checklist-box" id="courseTimeBody" style="display:none;">
+          <div class="schedule-add-row">
+            <div style="flex:1 1 140px;">
+              <label for="startDate" class="field-hint" style="margin-bottom:4px; display:block;">開始日（選填）</label>
+              <input type="date" id="startDate" style="width:100%; padding:9px 11px; border:1px solid rgba(55,53,47,0.12); border-radius:9px; font-family:inherit; font-size:13px; background:#fff; color:var(--dark);">
+            </div>
+            <div style="flex:1 1 140px;">
+              <label for="dueDate" class="field-hint" style="margin-bottom:4px; display:block;">到期日（選填）</label>
+              <input type="date" id="dueDate" style="width:100%; padding:9px 11px; border:1px solid rgba(55,53,47,0.12); border-radius:9px; font-family:inherit; font-size:13px; background:#fff; color:var(--dark);">
             </div>
           </div>
-          <div class="checklist-divider">或單筆新增</div>
-          <div class="checklist-add-row">
-            <select id="itemTypeSelect">
-              <option value="item">子項目（可勾選）</option>
-              <option value="header">大標題（不可勾選）</option>
-            </select>
-            <input type="text" id="itemInput" placeholder="例如：1-1 創業路徑：從零到營收破 10 億">
-            <button type="button" id="addItemBtn">新增</button>
+          <div class="schedule-add-row" style="margin-bottom:0;">
+            <div style="flex:1 1 auto;">
+              <label for="courseDurationValue" class="field-hint" style="margin-bottom:4px; display:block;">總課程時長（選填）</label>
+              <input type="number" id="courseDurationValue" min="0" step="0.5" placeholder="例如：12" style="width:100%; padding:9px 11px; border:1px solid rgba(55,53,47,0.12); border-radius:9px; font-family:inherit; font-size:13px; background:#fff; color:var(--dark);">
+            </div>
+            <div style="flex:0 0 auto; align-self:flex-end;">
+              <select id="courseDurationUnit" style="padding:9px 11px; border:1px solid rgba(55,53,47,0.12); border-radius:9px; font-family:inherit; font-size:13px; background:#fff; color:var(--dark);">
+                <option value="分鐘">分鐘</option>
+                <option value="小時" selected>小時</option>
+                <option value="天">天</option>
+              </select>
+            </div>
           </div>
-          <div class="checklist-items" id="checklistItems"></div>
-        </div>
-      </div>
-      <div class="field">
-        <label>學習時間（可新增多筆）</label>
-        <div class="schedule-box">
+
+          <div class="collapsible-field-divider">學習排程（可新增多筆）</div>
           <div class="schedule-add-row">
             <select id="scheduleType">
               <option value="weekly">每週固定時間</option>
@@ -757,6 +767,29 @@ select.filter-select{
             <button type="button" id="addScheduleBtn">新增排程</button>
           </div>
           <div class="schedule-list" id="scheduleList"></div>
+        </div>
+      </div>
+      <input type="hidden" id="progressFallback" value="0">
+      <div class="field">
+        <div class="collapsible-field-header" id="courseChapterToggle">
+          <button type="button" class="chevron-btn" id="courseChapterChevron">▸</button>
+          <label>課程章節</label>
+        </div>
+        <div class="checklist-box" id="courseChapterBody" style="display:none;">
+          <div class="checklist-bulk">
+            <textarea id="bulkItemInput" placeholder="填入課程大綱後，記得回來勾選完成，幫助你紀錄課程進度呦！"></textarea>
+            <div class="checklist-bulk-row">
+              <div class="bulk-btn-group">
+                <button type="button" id="addAsHeaderBtn">新增大標題</button>
+                <button type="button" id="addAsItemBtn">新增子項目</button>
+                <button type="button" id="bulkAddBtn">自動新增</button>
+              </div>
+            </div>
+            <div class="button-help-text">
+              自動新增：依編號自動判斷大標題或子項目。新增大標題／新增子項目：整段文字直接變成該類型。每行＝一個項目。
+            </div>
+          </div>
+          <div class="checklist-items" id="checklistItems"></div>
         </div>
       </div>
       <div class="field">
@@ -854,7 +887,6 @@ grant execute on function get_shared_state(uuid) to anon;</pre>
         <div class="cloud-tab-row">
           <button type="button" class="active" id="cloudTabMagic">免密碼登入</button>
           <button type="button" id="cloudTabSignIn">密碼登入</button>
-          <button type="button" id="cloudTabSignUp">註冊新帳號</button>
         </div>
         <div class="field">
           <label for="cloudEmailInput">Email</label>
@@ -867,10 +899,17 @@ grant execute on function get_shared_state(uuid) to anon;</pre>
         <button type="button" id="forgotPasswordBtn" class="tag-manage-link" style="display:none;">忘記密碼？</button>
         <p class="field-hint" id="cloudMagicHint" style="margin-bottom:10px;">
           寄送連結到信箱，點擊即完成登入（首次使用會自動建立帳號）。<br>
-          已有密碼帳號者，請改用「密碼登入」的「忘記密碼？」。
+          已有帳號想設密碼？改用「密碼登入」的忘記密碼即可，不用重新註冊。
         </p>
-        <div class="modal-actions">
+        <p class="field-hint" id="cloudPasswordHint" style="display:none; margin-bottom:10px;">
+          忘記密碼？也可以直接改用「免密碼登入」。
+        </p>
+        <div class="modal-actions" id="cloudMagicActions">
           <button type="button" class="btn btn-primary" id="cloudAuthSubmitBtn">寄送登入連結</button>
+        </div>
+        <div class="modal-actions" id="cloudPasswordActions" style="display:none;">
+          <button type="button" class="btn btn-secondary" id="cloudPwSignUpBtn">註冊</button>
+          <button type="button" class="btn btn-primary" id="cloudPwSignInBtn">登入</button>
         </div>
       </div>
 
@@ -907,6 +946,21 @@ grant execute on function get_shared_state(uuid) to anon;</pre>
           </div>
         </div>
 
+        <div class="field" style="margin-top:10px;">
+          <label>行事曆訂閱</label>
+          <p class="field-hint" style="margin-bottom:10px;">訂閱後，到期日和固定上課時間會自動出現在手機日曆裡，提醒交給日曆 App 處理；新增課程後，日曆會在幾小時內自動跟上，不用手動重新匯出。</p>
+          <div class="modal-actions" style="margin-top:0;">
+            <button type="button" class="btn btn-secondary" id="calendarToggleBtn">啟用行事曆訂閱</button>
+          </div>
+          <div id="calendarLinkBox" style="display:none; margin-top:10px;">
+            <input type="text" id="calendarLinkInput" readonly style="width:100%; padding:9px 11px; border:1px solid rgba(55,53,47,0.12); border-radius:9px; font-family:inherit; font-size:12px; background:var(--cream); color:var(--medium);">
+            <div class="modal-actions">
+              <button type="button" class="btn btn-secondary" id="calendarCopyBtn">複製連結</button>
+              <button type="button" class="btn btn-secondary" id="calendarRegenBtn">重新產生連結</button>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <div class="modal-actions">
@@ -921,6 +975,7 @@ grant execute on function get_shared_state(uuid) to anon;</pre>
 <script>
 const STORAGE_KEY = 'course_journal_v1';
 const LAST_LOCAL_CHANGE_KEY = 'course_journal_last_change_v1';
+const LAST_SYNCED_ACCOUNT_KEY = 'course_journal_last_account_v1';
 let applyingRemoteState = false;
 function markLocalChange(){
   if(applyingRemoteState) return; // don't count changes caused by applying data pulled from the cloud
@@ -953,6 +1008,12 @@ function scheduleOccursOn(s, dateStr, weekday){
 function displayName(c){
   return (c.alias && c.alias.trim()) ? c.alias.trim() : c.name;
 }
+function parseDurationString(str){
+  if(!str) return { value: '', unit: '小時' };
+  const match = String(str).trim().match(/^([\d.]+)\s*(分鐘|小時|天)?/);
+  if(!match) return { value: '', unit: '小時' };
+  return { value: match[1], unit: match[2] || '小時' };
+}
 
 // ---------- Data ----------
 function loadCourses(){
@@ -973,8 +1034,8 @@ let allTags = [];
 function loadAllTags(){
   try{
     const raw = localStorage.getItem(TAGS_STORAGE_KEY);
-    allTags = raw ? JSON.parse(raw) : ['工具','玄學技能','語言','商業'];
-  }catch(e){ allTags = ['工具','玄學技能','語言','商業']; }
+    allTags = raw ? JSON.parse(raw) : ['工具','技能','語言','商業'];
+  }catch(e){ allTags = ['工具','技能','語言','商業']; }
 }
 function saveAllTags(){
   localStorage.setItem(TAGS_STORAGE_KEY, JSON.stringify(allTags));
@@ -1097,7 +1158,7 @@ function courseCardHTML(c){
   if(c.dueDate){
     if(s !== 'done' && days !== null && days < 0){
       dueHTML = `<span class="due-badge due-overdue">已逾期 ${Math.abs(days)} 天</span>`;
-    } else if(s !== 'done' && days !== null && days <= 7){
+    } else if(s !== 'done' && days !== null && days <= 10){
       dueHTML = `<span class="due-badge due-soon">⏰ ${days === 0 ? '今天到期' : days + ' 天後到期'}</span>`;
     } else {
       dueHTML = `<span class="due-badge due-normal">到期日 ${c.dueDate}</span>`;
@@ -1171,7 +1232,7 @@ function renderDashboard(){
     const s = statusOf(c);
     if(s==='done' || !c.dueDate) return false;
     const d = daysUntil(c.dueDate);
-    return d !== null && d <= 7;
+    return d !== null && d <= 10;
   }).length;
   const completionRate = total > 0 ? Math.round((done / total) * 100) : 0;
 
@@ -1179,14 +1240,14 @@ function renderDashboard(){
     <div class="stat-card blue"><div class="num">${total}</div><div class="label">總課程數</div></div>
     <div class="stat-card sage"><div class="num">${done}</div><div class="label">已完成</div></div>
     <div class="stat-card sage"><div class="num">${completionRate}%</div><div class="label">完課率</div></div>
-    <div class="stat-card warn"><div class="num">${soon}</div><div class="label">7 天內到期</div></div>
+    <div class="stat-card warn"><div class="num">${soon}</div><div class="label">10 天內到期</div></div>
   `;
 
   const soonList = courses.filter(c=>{
     const s = statusOf(c);
     if(s==='done' || !c.dueDate) return false;
     const d = daysUntil(c.dueDate);
-    return d !== null && d <= 7;
+    return d !== null && d <= 10;
   }).sort((a,b)=>daysUntil(a.dueDate)-daysUntil(b.dueDate));
 
   const dashSoon = document.getElementById('dashboardSoon');
@@ -1500,7 +1561,7 @@ function progressItemHTML(c){
   if(c.dueDate){
     if(s !== 'done' && days !== null && days < 0){
       dueHTML = `<span class="due-badge due-overdue">已逾期 ${Math.abs(days)} 天</span>`;
-    } else if(s !== 'done' && days !== null && days <= 7){
+    } else if(s !== 'done' && days !== null && days <= 10){
       dueHTML = `<span class="due-badge due-soon">⏰ ${days === 0 ? '今天到期' : days + ' 天後到期'}</span>`;
     } else {
       dueHTML = `<span class="due-badge due-normal">到期日 ${c.dueDate}</span>`;
@@ -1920,6 +1981,21 @@ document.getElementById('tagManageBtn').addEventListener('click', ()=>{
   if(willShow) renderTagManageList();
 });
 
+document.getElementById('courseTimeToggle').addEventListener('click', ()=>{
+  const body = document.getElementById('courseTimeBody');
+  const chevron = document.getElementById('courseTimeChevron');
+  const willShow = body.style.display === 'none';
+  body.style.display = willShow ? 'block' : 'none';
+  chevron.classList.toggle('expanded', willShow);
+});
+document.getElementById('courseChapterToggle').addEventListener('click', ()=>{
+  const body = document.getElementById('courseChapterBody');
+  const chevron = document.getElementById('courseChapterChevron');
+  const willShow = body.style.display === 'none';
+  body.style.display = willShow ? 'block' : 'none';
+  chevron.classList.toggle('expanded', willShow);
+});
+
 function itemUid(){ return 'i_' + Date.now() + '_' + Math.random().toString(36).slice(2,6); }
 
 let dragId = null;
@@ -2014,40 +2090,54 @@ function startDragTracking(){
 }
 
 function syncProgressUI(){
-  const range = document.getElementById('progressRange');
-  const hint = document.getElementById('progressModeHint');
   const computed = computeProgressFromItems(draftItems);
   if(computed !== null){
-    range.value = computed;
-    range.disabled = true;
-    document.getElementById('progressLabel').textContent = computed;
-    hint.style.display = 'inline';
-  } else {
-    range.disabled = false;
-    hint.style.display = 'none';
+    document.getElementById('progressFallback').value = computed;
   }
+  // when computed is null (no items), progressFallback keeps whatever was set in openModal
 }
 function syncProgressWithItems(){
   syncProgressUI();
 }
 
-document.getElementById('addItemBtn').addEventListener('click', ()=>{
-  const input = document.getElementById('itemInput');
-  const type = document.getElementById('itemTypeSelect').value;
-  const text = input.value.trim();
-  if(!text) return;
-  draftItems.push({id: itemUid(), text, done:false, type});
-  input.value = '';
+function extractSortKey(text){
+  const normalized = String(text).replace(/[０-９]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0));
+  const match = normalized.match(/\d+(?:[.\-]\d+)*/);
+  if(!match) return null;
+  return match[0].split(/[.\-]/).map(n => parseInt(n, 10));
+}
+function compareSortKeys(a, b){
+  if(a === null && b === null) return 0;
+  if(a === null) return 1;
+  if(b === null) return -1;
+  const len = Math.max(a.length, b.length);
+  for(let i=0; i<len; i++){
+    const av = a[i] === undefined ? -1 : a[i];
+    const bv = b[i] === undefined ? -1 : b[i];
+    if(av !== bv) return av - bv;
+  }
+  return 0;
+}
+function sortDraftItemsByNumber(){
+  draftItems.sort((x, y) => compareSortKeys(extractSortKey(x.text), extractSortKey(y.text)));
+}
+
+function addLinesAsType(forcedType){
+  const textarea = document.getElementById('bulkItemInput');
+  const lines = textarea.value.split('\n').map(l=>l.trim()).filter(l=>l.length > 0);
+  if(lines.length === 0){
+    showToast('請先在框裡填入內容');
+    return;
+  }
+  lines.forEach(text => draftItems.push({id: itemUid(), text, done:false, type: forcedType}));
+  textarea.value = '';
+  sortDraftItemsByNumber();
   renderChecklist();
   syncProgressWithItems();
-  input.focus();
-});
-document.getElementById('itemInput').addEventListener('keydown', (e)=>{
-  if(e.key === 'Enter'){
-    e.preventDefault();
-    document.getElementById('addItemBtn').click();
-  }
-});
+  showToast(`已新增 ${lines.length} 個${forcedType === 'header' ? '大標題' : '子項目'}`);
+}
+document.getElementById('addAsHeaderBtn').addEventListener('click', ()=> addLinesAsType('header'));
+document.getElementById('addAsItemBtn').addEventListener('click', ()=> addLinesAsType('item'));
 
 function parseOutlineToNodes(raw){
   return raw
@@ -2076,6 +2166,7 @@ document.getElementById('bulkAddBtn').addEventListener('click', ()=>{
   }
   nodes.forEach(node => draftItems.push({id: itemUid(), text: node.text, done:false, type: node.type}));
   textarea.value = '';
+  sortDraftItemsByNumber();
   renderChecklist();
   syncProgressWithItems();
   const childCount = nodes.filter(n=>n.type==='item').length;
@@ -2089,9 +2180,7 @@ function openModal(id){
   editingId = id || null;
   const form = document.getElementById('courseForm');
   form.reset();
-  document.getElementById('progressLabel').textContent = '0';
-  document.getElementById('progressRange').disabled = false;
-  document.getElementById('progressModeHint').style.display = 'none';
+  document.getElementById('progressFallback').value = '0';
   if(id){
     const c = courses.find(x=>x.id === id);
     document.getElementById('modalTitle').textContent = '編輯課程';
@@ -2100,9 +2189,8 @@ function openModal(id){
     document.getElementById('courseAlias').value = c.alias || '';
     document.getElementById('startDate').value = c.startDate || '';
     document.getElementById('dueDate').value = c.dueDate || '';
-    document.getElementById('courseDuration').value = c.duration || '';
-    document.getElementById('progressRange').value = c.progress;
-    document.getElementById('progressLabel').textContent = c.progress;
+    { const d = parseDurationString(c.duration); document.getElementById('courseDurationValue').value = d.value; document.getElementById('courseDurationUnit').value = d.unit; }
+    document.getElementById('progressFallback').value = c.progress;
     document.getElementById('courseNote').value = c.note || '';
     document.getElementById('courseLoginUrl').value = c.loginUrl || '';
     document.getElementById('deleteRow').style.display = 'flex';
@@ -2124,6 +2212,10 @@ function openModal(id){
   renderChecklist();
   renderScheduleList();
   renderTagList();
+  document.getElementById('courseTimeBody').style.display = 'none';
+  document.getElementById('courseTimeChevron').classList.remove('expanded');
+  document.getElementById('courseChapterBody').style.display = 'none';
+  document.getElementById('courseChapterChevron').classList.remove('expanded');
   overlay.classList.add('open');
 }
 function closeModal(){
@@ -2137,10 +2229,6 @@ document.getElementById('fabAdd').addEventListener('click', ()=>openModal(null))
 document.getElementById('cancelBtn').addEventListener('click', closeModal);
 overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeModal(); });
 
-document.getElementById('progressRange').addEventListener('input', (e)=>{
-  document.getElementById('progressLabel').textContent = e.target.value;
-});
-
 document.getElementById('courseForm').addEventListener('submit', (e)=>{
   e.preventDefault();
   const id = document.getElementById('courseId').value;
@@ -2152,8 +2240,8 @@ document.getElementById('courseForm').addEventListener('submit', (e)=>{
     alias: document.getElementById('courseAlias').value.trim(),
     startDate: document.getElementById('startDate').value,
     dueDate: document.getElementById('dueDate').value,
-    duration: document.getElementById('courseDuration').value.trim(),
-    progress: computed !== null ? computed : parseInt(document.getElementById('progressRange').value, 10),
+    duration: (()=>{ const v = document.getElementById('courseDurationValue').value.trim(); return v ? `${v} ${document.getElementById('courseDurationUnit').value}` : ''; })(),
+    progress: computed !== null ? computed : (parseInt(document.getElementById('progressFallback').value, 10) || 0),
     note: document.getElementById('courseNote').value.trim(),
     loginUrl: document.getElementById('courseLoginUrl').value.trim(),
     items: draftItems,
@@ -2284,7 +2372,7 @@ let supabaseClient = null;
 let supabaseUser = null;
 let realtimeChannel = null;
 let pushDebounceTimer = null;
-let cloudAuthMode = 'magic'; // 'magic' | 'signin' | 'signup'
+let cloudAuthMode = 'magic'; // 'magic' | 'signin'
 
 function loadSupabaseConfig(){
   return { url: HARDCODED_SUPABASE_URL, anonKey: HARDCODED_SUPABASE_ANON_KEY };
@@ -2376,8 +2464,32 @@ function downloadJSONBackup(dataObj, source){
 
 // no manual conflict UI needed — resolution is automatic (see pullFromCloudAndResolve)
 
+function resetLocalCacheForNewAccount(){
+  courses = [];
+  allTags = ['工具','技能','語言','商業'];
+  tagColorMap = {};
+  nextTagColorIndex = 0;
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(TAGS_STORAGE_KEY);
+  localStorage.removeItem(TAG_COLOR_MAP_KEY);
+  localStorage.removeItem(TAG_COLOR_NEXT_KEY);
+  localStorage.removeItem(LAST_LOCAL_CHANGE_KEY);
+  seedIfEmpty();
+}
+
 async function pullFromCloudAndResolve(){
   if(!supabaseClient || !supabaseUser) return;
+
+  // If this device's local cache belongs to a DIFFERENT account than the one now logging
+  // in, that local data doesn't belong here at all — reset to a fresh/demo state first so
+  // one account's courses can never bleed into another account's cloud data.
+  const lastAccount = localStorage.getItem(LAST_SYNCED_ACCOUNT_KEY);
+  if(lastAccount && lastAccount !== supabaseUser.id){
+    resetLocalCacheForNewAccount();
+    renderAll();
+  }
+  localStorage.setItem(LAST_SYNCED_ACCOUNT_KEY, supabaseUser.id);
+
   const { data, error } = await supabaseClient
     .from('app_state')
     .select('data, updated_at')
@@ -2479,6 +2591,7 @@ async function afterLogin(){
   await pullFromCloudAndResolve();
   subscribeRealtime();
   await loadShareState();
+  await loadCalendarState();
 }
 
 async function checkExistingSession(){
@@ -2538,17 +2651,16 @@ document.getElementById('cloudSaveConfigBtn').addEventListener('click', ()=>{
 function setCloudAuthMode(mode){
   cloudAuthMode = mode;
   document.getElementById('cloudTabSignIn').classList.toggle('active', mode === 'signin');
-  document.getElementById('cloudTabSignUp').classList.toggle('active', mode === 'signup');
   document.getElementById('cloudTabMagic').classList.toggle('active', mode === 'magic');
   const isMagic = mode === 'magic';
   document.getElementById('cloudPasswordField').style.display = isMagic ? 'none' : 'block';
   document.getElementById('cloudMagicHint').style.display = isMagic ? 'block' : 'none';
-  document.getElementById('forgotPasswordBtn').style.display = mode === 'signin' ? 'inline-block' : 'none';
-  document.getElementById('cloudAuthSubmitBtn').textContent =
-    mode === 'signin' ? '登入' : mode === 'signup' ? '註冊' : '寄送登入連結';
+  document.getElementById('cloudPasswordHint').style.display = isMagic ? 'none' : 'block';
+  document.getElementById('forgotPasswordBtn').style.display = isMagic ? 'none' : 'inline-block';
+  document.getElementById('cloudMagicActions').style.display = isMagic ? 'flex' : 'none';
+  document.getElementById('cloudPasswordActions').style.display = isMagic ? 'none' : 'flex';
 }
 document.getElementById('cloudTabSignIn').addEventListener('click', ()=> setCloudAuthMode('signin'));
-document.getElementById('cloudTabSignUp').addEventListener('click', ()=> setCloudAuthMode('signup'));
 document.getElementById('cloudTabMagic').addEventListener('click', ()=> setCloudAuthMode('magic'));
 
 document.getElementById('forgotPasswordBtn').addEventListener('click', async ()=>{
@@ -2588,50 +2700,61 @@ document.getElementById('cloudRecoverySubmitBtn').addEventListener('click', asyn
 document.getElementById('cloudAuthSubmitBtn').addEventListener('click', async ()=>{
   if(!supabaseClient){ showToast('尚未連線到 Supabase'); return; }
   const email = document.getElementById('cloudEmailInput').value.trim();
-  const password = document.getElementById('cloudPasswordInput').value;
-
-  if(cloudAuthMode === 'magic'){
-    if(!email){ showToast('請輸入 Email'); return; }
-    const btn = document.getElementById('cloudAuthSubmitBtn');
-    btn.disabled = true;
-    try{
-      const redirectTo = window.location.origin + window.location.pathname;
-      const { error } = await supabaseClient.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: redirectTo }
-      });
-      if(error){ showToast('寄送失敗：' + error.message); return; }
-      showToast('登入連結已寄出，請至信箱收信並點擊連結');
-    }catch(e){
-      showToast('發生錯誤：' + e.message);
-    }finally{
-      btn.disabled = false;
-    }
-    return;
-  }
-
-  if(!email || !password){ showToast('請輸入 Email 和密碼'); return; }
-
+  if(!email){ showToast('請輸入 Email'); return; }
   const btn = document.getElementById('cloudAuthSubmitBtn');
   btn.disabled = true;
   try{
-    if(cloudAuthMode === 'signup'){
-      const { data, error } = await supabaseClient.auth.signUp({ email, password });
-      if(error){ showToast('註冊失敗：' + error.message); return; }
-      if(data.session){
-        supabaseUser = data.user;
-        await afterLogin();
-        showToast('註冊成功並已登入');
-      } else {
-        showToast('註冊成功！請至信箱收信完成驗證後再登入');
-      }
-    } else {
-      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-      if(error){ showToast('登入失敗：' + error.message); return; }
+    const redirectTo = window.location.origin + window.location.pathname;
+    const { error } = await supabaseClient.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: redirectTo }
+    });
+    if(error){ showToast('寄送失敗：' + error.message); return; }
+    showToast('登入連結已寄出，請至信箱收信並點擊連結');
+  }catch(e){
+    showToast('發生錯誤：' + e.message);
+  }finally{
+    btn.disabled = false;
+  }
+});
+
+document.getElementById('cloudPwSignUpBtn').addEventListener('click', async ()=>{
+  if(!supabaseClient){ showToast('尚未連線到 Supabase'); return; }
+  const email = document.getElementById('cloudEmailInput').value.trim();
+  const password = document.getElementById('cloudPasswordInput').value;
+  if(!email || !password){ showToast('請輸入 Email 和密碼'); return; }
+  const btn = document.getElementById('cloudPwSignUpBtn');
+  btn.disabled = true;
+  try{
+    const { data, error } = await supabaseClient.auth.signUp({ email, password });
+    if(error){ showToast('註冊失敗：' + error.message); return; }
+    if(data.session){
       supabaseUser = data.user;
       await afterLogin();
-      showToast('已登入');
+      showToast('註冊成功並已登入');
+    } else {
+      showToast('註冊成功！請至信箱收信完成驗證後再登入');
     }
+  }catch(e){
+    showToast('發生錯誤：' + e.message);
+  }finally{
+    btn.disabled = false;
+  }
+});
+
+document.getElementById('cloudPwSignInBtn').addEventListener('click', async ()=>{
+  if(!supabaseClient){ showToast('尚未連線到 Supabase'); return; }
+  const email = document.getElementById('cloudEmailInput').value.trim();
+  const password = document.getElementById('cloudPasswordInput').value;
+  if(!email || !password){ showToast('請輸入 Email 和密碼'); return; }
+  const btn = document.getElementById('cloudPwSignInBtn');
+  btn.disabled = true;
+  try{
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if(error){ showToast('登入失敗：' + error.message); return; }
+    supabaseUser = data.user;
+    await afterLogin();
+    showToast('已登入');
   }catch(e){
     showToast('發生錯誤：' + e.message);
   }finally{
@@ -2643,10 +2766,15 @@ document.getElementById('cloudManualSyncBtn').addEventListener('click', async ()
   await pushToCloud(true);
   showToast('已手動同步到雲端');
 });
+
 document.getElementById('cloudSignOutBtn').addEventListener('click', async ()=>{
   if(supabaseClient){ await supabaseClient.auth.signOut(); }
   supabaseUser = null;
   if(realtimeChannel && supabaseClient){ supabaseClient.removeChannel(realtimeChannel); realtimeChannel = null; }
+  // Local data is left untouched on logout — it may be genuine local-only data, or it may
+  // simply not have been synced yet. If a *different* account logs in later,
+  // pullFromCloudAndResolve() detects the account mismatch and starts that account fresh
+  // instead of inheriting this data; logging back into the *same* account syncs normally.
   updateCloudStatusUI();
   showToast('已登出');
 });
@@ -2733,6 +2861,89 @@ document.getElementById('shareRegenBtn').addEventListener('click', async ()=>{
   if(!confirm('重新產生連結後，舊的分享連結會立即失效，確定嗎？')) return;
   await setShareState(true, true);
   showToast('已產生新的分享連結');
+});
+
+// ---------- Calendar subscription (webcal feed via Supabase Edge Function) ----------
+let currentCalendarState = { token: null, enabled: false };
+const CALENDAR_FUNCTION_URL = HARDCODED_SUPABASE_URL + '/functions/v1/smart-worker';
+
+function buildCalendarUrl(token){
+  const httpsUrl = `${CALENDAR_FUNCTION_URL}?token=${token}`;
+  return httpsUrl.replace(/^https:\/\//, 'webcal://');
+}
+
+function updateCalendarUI(){
+  const box = document.getElementById('calendarLinkBox');
+  const toggleBtn = document.getElementById('calendarToggleBtn');
+  if(currentCalendarState.enabled && currentCalendarState.token){
+    toggleBtn.textContent = '停用行事曆訂閱';
+    box.style.display = 'block';
+    document.getElementById('calendarLinkInput').value = buildCalendarUrl(currentCalendarState.token);
+  } else {
+    toggleBtn.textContent = '啟用行事曆訂閱';
+    box.style.display = 'none';
+  }
+}
+
+async function loadCalendarState(){
+  if(!supabaseClient || !supabaseUser) return;
+  const { data, error } = await supabaseClient
+    .from('app_state')
+    .select('calendar_token, calendar_enabled')
+    .eq('user_id', supabaseUser.id)
+    .maybeSingle();
+  if(error){ console.error('loadCalendarState error', error); return; }
+  currentCalendarState.token = (data && data.calendar_token) || null;
+  currentCalendarState.enabled = !!(data && data.calendar_enabled);
+  updateCalendarUI();
+}
+
+async function setCalendarState(enabled, regenerate){
+  if(!supabaseClient || !supabaseUser) return;
+  let token = currentCalendarState.token;
+  if(!token || regenerate){
+    token = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() :
+      'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c=>{
+        const r = Math.random()*16|0, v = c === 'x' ? r : (r&0x3|0x8);
+        return v.toString(16);
+      });
+  }
+  const { error } = await supabaseClient.from('app_state').upsert({
+    user_id: supabaseUser.id,
+    data: buildStateBlob(),
+    calendar_token: token,
+    calendar_enabled: enabled,
+    updated_at: new Date().toISOString()
+  });
+  if(error){ showToast('行事曆設定失敗：' + error.message); return; }
+  currentCalendarState.token = token;
+  currentCalendarState.enabled = enabled;
+  updateCalendarUI();
+}
+
+document.getElementById('calendarToggleBtn').addEventListener('click', async ()=>{
+  if(currentCalendarState.enabled){
+    await setCalendarState(false, false);
+    showToast('已停用行事曆訂閱');
+  } else {
+    await setCalendarState(true, !currentCalendarState.token);
+    showToast('已啟用行事曆訂閱');
+  }
+});
+document.getElementById('calendarCopyBtn').addEventListener('click', ()=>{
+  const input = document.getElementById('calendarLinkInput');
+  input.select();
+  try{
+    document.execCommand('copy');
+    showToast('連結已複製');
+  }catch(e){
+    showToast('複製失敗，請手動選取複製');
+  }
+});
+document.getElementById('calendarRegenBtn').addEventListener('click', async ()=>{
+  if(!confirm('重新產生連結後，舊的行事曆訂閱連結會立即失效，確定嗎？')) return;
+  await setCalendarState(true, true);
+  showToast('已產生新的行事曆訂閱連結');
 });
 
 // ---------- Share viewer mode (opened via ?share=...) ----------
