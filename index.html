@@ -708,13 +708,14 @@ select.filter-select{
           <div id="calendarPlatformDetail" style="display:none;">
             <input type="text" id="calendarLinkInput" readonly style="width:100%; padding:9px 11px; border:1px solid rgba(55,53,47,0.12); border-radius:9px; font-family:inherit; font-size:12px; background:var(--cream); color:var(--medium); margin-bottom:8px;">
             <div class="modal-actions" style="margin-top:0;">
+              <button type="button" class="btn btn-primary" id="calendarAutoAddBtn">點此自動加入日曆</button>
               <button type="button" class="btn btn-secondary" id="calendarCopyBtn">複製連結</button>
             </div>
             <p class="field-hint" id="calendarHintIOS" style="margin-top:8px;">
-              直接點上面複製好的連結，會自動跳出「加入日曆」的視窗，按確認即可。
+              點「點此自動加入日曆」會直接跳出「訂閱這個行事曆嗎？」的視窗，按確認即可，不用手動複製貼上。
             </p>
             <p class="field-hint" id="calendarHintGoogle" style="display:none; margin-top:8px;">
-              電腦開 calendar.google.com → 左側「其他日曆」旁的 + → 「透過網址訂閱」→ 把連結貼上 → 新增日曆。手機會自動同步顯示。
+              點「點此自動加入日曆」會開新分頁跳到 Google 日曆，直接跳出訂閱確認畫面，按「新增」即可。手機上的 Google 日曆 App 會自動同步顯示。
             </p>
           </div>
         </div>
@@ -733,10 +734,10 @@ select.filter-select{
           <button type="button" id="tutorialTabGoogle">Google 日曆</button>
         </div>
         <p class="field-hint" id="tutorialHintIOS" style="margin-bottom:14px; line-height:1.7;">
-          把連結貼到 Safari 網址列打開（或在備忘錄／訊息裡點一下），會自動跳出「訂閱這個行事曆嗎？」的視窗，按「訂閱」即可。之後打開「日曆」App 就能看到。
+          點上面「你要用哪一種日曆？」選 Apple 日曆，再點「點此自動加入日曆」，會直接跳出「訂閱這個行事曆嗎？」的視窗，按「訂閱」即可。之後打開「日曆」App 就能看到。
         </p>
         <p class="field-hint" id="tutorialHintGoogle" style="display:none; margin-bottom:14px; line-height:1.7;">
-          電腦開 calendar.google.com → 左側「其他日曆」旁的 + → 「透過網址訂閱」→ 把連結貼上，並把開頭 webcal:// 改成 https:// → 新增日曆。手機上的 Google 日曆 App 會自動同步顯示，不用再另外設定。
+          點上面「你要用哪一種日曆？」選 Google 日曆，再點「點此自動加入日曆」，會直接跳到 Google 日曆的訂閱確認畫面，按「新增」即可。手機上的 Google 日曆 App 會自動同步顯示，不用再另外設定。
         </p>
 
         <div class="collapsible-field-divider">第三步：設定提醒時間</div>
@@ -995,16 +996,13 @@ grant execute on function get_shared_state(uuid) to anon;</pre>
 
       <div id="cloudLoggedInView" style="display:none;">
         <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" id="cloudManualSyncBtn">立即同步</button>
+          <button type="button" class="btn btn-secondary" id="cloudShareToolBtn">分享此工具</button>
           <button type="button" class="btn btn-primary" id="cloudSignOutBtn">登出</button>
         </div>
 
         <div class="field" style="margin-top:10px;">
-          <label>唯讀分享連結</label>
-          <p class="field-hint" style="margin-bottom:6px;">連結能「唯讀檢視」你的課程，對方無法編輯。</p>
-          <p class="field-hint" style="margin-bottom:10px;">只想讓別人使用這個工具（不是看你的課程）？直接給這個網址就好：<br>https://hanne-1.github.io/course-tracker/</p>
           <div class="modal-actions" style="margin-top:0;">
-            <button type="button" class="btn btn-secondary" id="shareToggleBtn">啟用分享連結</button>
+            <button type="button" class="btn btn-secondary" id="shareToggleBtn">分享我的課程</button>
           </div>
           <div id="shareLinkBox" style="display:none; margin-top:10px;">
             <input type="text" id="shareLinkInput" readonly style="width:100%; padding:9px 11px; border:1px solid rgba(55,53,47,0.12); border-radius:9px; font-family:inherit; font-size:12px; background:var(--cream); color:var(--medium);">
@@ -2846,9 +2844,22 @@ document.getElementById('cloudPwSignInBtn').addEventListener('click', async ()=>
   }
 });
 
-document.getElementById('cloudManualSyncBtn').addEventListener('click', async ()=>{
-  await pushToCloud(true);
-  showToast('已手動同步到雲端');
+document.getElementById('cloudShareToolBtn').addEventListener('click', async ()=>{
+  const toolUrl = window.location.origin + window.location.pathname;
+  if(navigator.share){
+    try{
+      await navigator.share({ title: '學習紀錄', text: '一起用這個工具記錄課程進度吧！', url: toolUrl });
+    }catch(e){
+      // user cancelled the share sheet — no need to show an error
+    }
+  } else {
+    try{
+      await navigator.clipboard.writeText(toolUrl);
+      showToast('連結已複製，貼給朋友就可以了');
+    }catch(e){
+      showToast('複製失敗，請手動複製：' + toolUrl);
+    }
+  }
 });
 
 document.getElementById('cloudSignOutBtn').addEventListener('click', async ()=>{
@@ -2878,11 +2889,11 @@ function updateShareUI(){
   const box = document.getElementById('shareLinkBox');
   const toggleBtn = document.getElementById('shareToggleBtn');
   if(currentShareState.enabled && currentShareState.token){
-    toggleBtn.textContent = '停用分享連結';
+    toggleBtn.textContent = '停止分享課程';
     box.style.display = 'block';
     document.getElementById('shareLinkInput').value = buildShareUrl(currentShareState.token);
   } else {
-    toggleBtn.textContent = '啟用分享連結';
+    toggleBtn.textContent = '分享我的課程';
     box.style.display = 'none';
   }
 }
@@ -2926,10 +2937,10 @@ async function setShareState(enabled, regenerate){
 document.getElementById('shareToggleBtn').addEventListener('click', async ()=>{
   if(currentShareState.enabled){
     await setShareState(false, false);
-    showToast('已停用分享連結');
+    showToast('已停止分享課程');
   } else {
     await setShareState(true, !currentShareState.token);
-    showToast('已啟用分享連結');
+    showToast('已開始分享我的課程');
   }
 });
 document.getElementById('shareCopyBtn').addEventListener('click', ()=>{
@@ -2955,6 +2966,10 @@ const CALENDAR_FUNCTION_URL = HARDCODED_SUPABASE_URL + '/functions/v1/smart-work
 function buildCalendarUrl(token, platform){
   const httpsUrl = `${CALENDAR_FUNCTION_URL}?token=${token}`;
   return platform === 'ios' ? httpsUrl.replace(/^https:\/\//, 'webcal://') : httpsUrl;
+}
+function buildGoogleSubscribeUrl(token){
+  const webcalUrl = `${CALENDAR_FUNCTION_URL}?token=${token}`.replace(/^https:\/\//, 'webcal://');
+  return 'https://calendar.google.com/calendar/r?cid=' + encodeURIComponent(webcalUrl);
 }
 
 let calendarSelectedPlatform = null; // null | 'ios' | 'google'
@@ -3038,6 +3053,15 @@ document.getElementById('calendarCopyBtn').addEventListener('click', ()=>{
     showToast('連結已複製');
   }catch(e){
     showToast('複製失敗，請手動選取複製');
+  }
+});
+
+document.getElementById('calendarAutoAddBtn').addEventListener('click', ()=>{
+  if(!currentCalendarState.token) return;
+  if(calendarSelectedPlatform === 'ios'){
+    window.location.href = buildCalendarUrl(currentCalendarState.token, 'ios');
+  } else if(calendarSelectedPlatform === 'google'){
+    window.open(buildGoogleSubscribeUrl(currentCalendarState.token), '_blank');
   }
 });
 
