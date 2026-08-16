@@ -108,6 +108,9 @@ main{max-width:960px; margin:0 auto; padding:22px 20px 40px;}
   background:#fff; border-radius:var(--radius); padding:18px 16px;
   box-shadow:var(--shadow); border:1px solid rgba(55,53,47,0.05);
 }
+.stat-card.clickable{ cursor:pointer; transition:transform .12s, box-shadow .12s; }
+.stat-card.clickable:hover{ box-shadow:var(--shadow-hover); transform:translateY(-1px); }
+.stat-card.clickable:active{ transform:translateY(0); }
 .stat-card .num{font-size:28px; font-weight:900; line-height:1;}
 .stat-card .label{font-size:12.5px; color:var(--medium); margin-top:8px; font-weight:500;}
 .stat-card.pink{border-left:4px solid var(--lavender);}
@@ -195,6 +198,7 @@ main{max-width:960px; margin:0 auto; padding:22px 20px 40px;}
 }
 .progress-item-header{
   display:flex; align-items:center; gap:10px; padding:14px 16px; cursor:pointer;
+  flex-wrap:wrap;
 }
 .progress-item-header:hover{ background:var(--light-pink); }
 .chevron-btn{
@@ -218,7 +222,7 @@ main{max-width:960px; margin:0 auto; padding:22px 20px 40px;}
 .button-help-text{
   font-size:11.5px; color:var(--gray); line-height:1.6; margin-top:8px;
 }
-.pi-name{ flex:1; font-size:14.5px; font-weight:700; color:var(--dark); min-width:0;
+.pi-name{ flex:1 1 110px; font-size:14.5px; font-weight:700; color:var(--dark); min-width:110px;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .pi-progress-mini{ display:flex; align-items:center; gap:6px; width:90px; flex-shrink:0; }
 .pi-progress-mini .progress-track{ flex:1; }
@@ -354,7 +358,7 @@ select.filter-select{
 
 /* ---------- Recurring schedule (in modal) ---------- */
 .schedule-box{ background:var(--cream); border-radius:12px; padding:12px; }
-.schedule-add-row{ display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; align-items:center; }
+.schedule-add-row{ display:flex; gap:12px; margin-bottom:10px; flex-wrap:wrap; align-items:center; }
 .schedule-add-row select, .schedule-add-row input[type=time], .schedule-add-row input[type=date]{
   padding:8px 7px; border:1px solid rgba(55,53,47,0.12); border-radius:9px;
   font-family:inherit; font-size:12px; background:#fff; color:var(--dark);
@@ -1218,14 +1222,18 @@ function showToast(msg, duration){
 }
 
 // ---------- Nav ----------
+function goToPage(pageName){
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  const targetBtn = document.querySelector(`nav button[data-page="${pageName}"]`);
+  if(targetBtn) targetBtn.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-' + pageName).classList.add('active');
+  renderAll();
+}
 document.getElementById('navBar').addEventListener('click', (e)=>{
   const btn = e.target.closest('button[data-page]');
   if(!btn) return;
-  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-' + btn.dataset.page).classList.add('active');
-  renderAll();
+  goToPage(btn.dataset.page);
 });
 
 // ---------- Rendering ----------
@@ -1316,11 +1324,12 @@ function renderDashboard(){
   const completionRate = total > 0 ? Math.round((done / total) * 100) : 0;
 
   document.getElementById('statGrid').innerHTML = `
-    <div class="stat-card blue"><div class="num">${total}</div><div class="label">總課程數</div></div>
+    <div class="stat-card blue clickable" id="statTotalCourses"><div class="num">${total}</div><div class="label">總課程數</div></div>
     <div class="stat-card sage"><div class="num">${done}</div><div class="label">已完成</div></div>
     <div class="stat-card sage"><div class="num">${completionRate}%</div><div class="label">完課率</div></div>
     <div class="stat-card warn"><div class="num">${soon}</div><div class="label">10 天內到期</div></div>
   `;
+  document.getElementById('statTotalCourses').addEventListener('click', ()=> goToPage('list'));
 
   const soonList = courses.filter(c=>{
     const s = statusOf(c);
