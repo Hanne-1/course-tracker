@@ -845,7 +845,7 @@ select.filter-select{
         <input type="text" id="courseAlias" placeholder="例如：塔羅進階">
       </div>
       <div class="field">
-        <label>標籤（可新增多筆，可拖曳排序）</label>
+        <label>標籤（為自動排程依據，可新增多筆和拖曳排序）</label>
         <div class="tag-list" id="tagList"></div>
         <div class="tag-add-row">
           <select id="tagExistingSelect"><option value="">選擇已有標籤...</option></select>
@@ -858,7 +858,7 @@ select.filter-select{
       <div class="field">
         <div class="collapsible-field-header" id="courseTimeToggle">
           <button type="button" class="chevron-btn" id="courseTimeChevron">▸</button>
-          <label>課程時間和學習排程</label>
+          <label>課程時間</label>
         </div>
         <div class="checklist-box" id="courseTimeBody" style="display:none;">
           <div class="schedule-add-row">
@@ -894,37 +894,6 @@ select.filter-select{
               </div>
             </div>
           </div>
-
-          <div class="collapsible-field-divider">學習排程（可新增多筆）</div>
-          <div class="schedule-add-row">
-            <select id="scheduleType">
-              <option value="weekly">每週固定時間</option>
-              <option value="single">單日時間</option>
-              <option value="range">區間時間</option>
-            </select>
-            <span id="scheduleWeeklyFields" style="display:contents;">
-              <select id="scheduleWeekday">
-                <option value="0">週日</option>
-                <option value="1">週一</option>
-                <option value="2">週二</option>
-                <option value="3">週三</option>
-                <option value="4" selected>週四</option>
-                <option value="5">週五</option>
-                <option value="6">週六</option>
-              </select>
-            </span>
-            <span id="scheduleSingleFields" style="display:none;">
-              <input type="date" id="scheduleSingleDate">
-            </span>
-            <span id="scheduleRangeFields" style="display:none;">
-              <input type="date" id="scheduleRangeStart">
-              <span class="schedule-range-sep">～</span>
-              <input type="date" id="scheduleRangeEnd">
-            </span>
-            <input type="time" id="scheduleTime" value="20:00">
-            <button type="button" id="addScheduleBtn">新增排程</button>
-          </div>
-          <div class="schedule-list" id="scheduleList"></div>
         </div>
       </div>
       <input type="hidden" id="progressFallback" value="0">
@@ -2388,71 +2357,6 @@ let dragTagId = null;
 
 function scheduleUid(){ return 's_' + Date.now() + '_' + Math.random().toString(36).slice(2,6); }
 
-function renderScheduleList(){
-  const container = document.getElementById('scheduleList');
-  if(draftSchedule.length === 0){
-    container.innerHTML = `<div class="schedule-empty">還沒有設定固定上課時間。</div>`;
-  } else {
-    const typeOrder = { weekly: 0, single: 1, range: 2 };
-    const sortKey = (s) => {
-      if(s.type === 'single') return s.date;
-      if(s.type === 'range') return s.startDate;
-      return String(s.weekday).padStart(2,'0');
-    };
-    const sorted = [...draftSchedule].sort((a,b)=>{
-      const ta = typeOrder[a.type] ?? 0;
-      const tb = typeOrder[b.type] ?? 0;
-      if(ta !== tb) return ta - tb;
-      return sortKey(a).localeCompare(sortKey(b)) || a.time.localeCompare(b.time);
-    });
-    container.innerHTML = sorted.map(s => `
-      <div class="schedule-chip" data-schedule-id="${s.id}">
-        <span>${formatSchedule(s)}</span>
-        <button type="button" class="remove-item">×</button>
-      </div>
-    `).join('');
-    container.querySelectorAll('.schedule-chip').forEach(chip=>{
-      const id = chip.dataset.scheduleId;
-      chip.querySelector('.remove-item').addEventListener('click', ()=>{
-        draftSchedule = draftSchedule.filter(s=>s.id !== id);
-        renderScheduleList();
-      });
-    });
-  }
-}
-document.getElementById('scheduleType').addEventListener('change', (e)=>{
-  const type = e.target.value;
-  document.getElementById('scheduleWeeklyFields').style.display = type === 'weekly' ? 'contents' : 'none';
-  document.getElementById('scheduleSingleFields').style.display = type === 'single' ? 'contents' : 'none';
-  document.getElementById('scheduleRangeFields').style.display = type === 'range' ? 'contents' : 'none';
-});
-document.getElementById('addScheduleBtn').addEventListener('click', ()=>{
-  const type = document.getElementById('scheduleType').value;
-  const time = document.getElementById('scheduleTime').value;
-  if(!time){ showToast('請選擇上課時間'); return; }
-
-  let entry = { id: scheduleUid(), type, time };
-  if(type === 'weekly'){
-    entry.weekday = parseInt(document.getElementById('scheduleWeekday').value, 10);
-  } else if(type === 'single'){
-    const d = document.getElementById('scheduleSingleDate').value;
-    if(!d){ showToast('請選擇日期'); return; }
-    entry.date = d;
-  } else if(type === 'range'){
-    const s = document.getElementById('scheduleRangeStart').value;
-    const e = document.getElementById('scheduleRangeEnd').value;
-    if(!s || !e){ showToast('請選擇區間起訖日期'); return; }
-    if(s > e){ showToast('結束日期不能早於開始日期'); return; }
-    entry.startDate = s;
-    entry.endDate = e;
-  }
-
-  const exists = draftSchedule.some(s => JSON.stringify({...s, id:null}) === JSON.stringify({...entry, id:null}));
-  if(exists){ showToast('這個時段已經加過了'); return; }
-  draftSchedule.push(entry);
-  renderScheduleList();
-});
-
 // ---------- Tags ----------
 function renderTagExistingSelect(){
   const sel = document.getElementById('tagExistingSelect');
@@ -2912,12 +2816,7 @@ function openModal(id){
     draftSchedule = [];
     draftTags = [];
   }
-  document.getElementById('scheduleType').value = 'weekly';
-  document.getElementById('scheduleWeeklyFields').style.display = 'contents';
-  document.getElementById('scheduleSingleFields').style.display = 'none';
-  document.getElementById('scheduleRangeFields').style.display = 'none';
   renderChecklist();
-  renderScheduleList();
   renderTagList();
   document.getElementById('courseTimeBody').style.display = 'none';
   document.getElementById('courseTimeChevron').classList.remove('expanded');
