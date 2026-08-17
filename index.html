@@ -160,6 +160,77 @@ main{max-width:960px; margin:0 auto; padding:22px 20px 40px;}
 }
 .today-empty .glyph{font-size:30px; display:block; margin-bottom:8px;}
 
+/* ---------- Auto schedule button + all-schedule list ---------- */
+.auto-schedule-btn{
+  width:100%; padding:12px; border-radius:14px; border:none; margin:14px 0 4px;
+  background:linear-gradient(135deg, var(--pink), var(--lavender)); color:#fff;
+  font-family:inherit; font-size:13.5px; font-weight:700; cursor:pointer;
+}
+.all-schedule-panel{ display:flex; flex-direction:column; gap:8px; }
+.sched-row{
+  background:#fff; border-radius:14px; padding:12px 13px; box-shadow:var(--shadow);
+  border:1px solid rgba(55,53,47,0.05);
+}
+.sched-row-main{ display:flex; align-items:center; gap:10px; cursor:pointer; }
+.sched-row .sr-info{ flex:1; min-width:0; }
+.sched-row .sr-name{ font-size:13.5px; font-weight:700; color:var(--dark); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sched-row .sr-time{ font-size:11.5px; color:var(--gray); margin-top:2px; }
+.sched-row .sr-tag{ font-size:10px; font-weight:700; padding:3px 9px; border-radius:99px; flex-shrink:0; }
+.sched-row .sr-edit{ color:var(--gray); font-size:13px; flex-shrink:0; padding:4px; }
+.sched-row-edit{ display:none; margin-top:10px; padding-top:10px; border-top:1px solid rgba(55,53,47,0.06); }
+.sched-row.expanded .sched-row-edit{ display:block; }
+.sched-row-edit-fields{ display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+.sched-row-edit-fields select, .sched-row-edit-fields input{
+  flex:1 1 100px; padding:8px; border-radius:8px; border:1px solid rgba(55,53,47,0.12);
+  font-family:inherit; font-size:12.5px; background:var(--cream); color:var(--dark);
+}
+.sched-empty{ text-align:center; padding:24px 10px; color:var(--gray); font-size:13px; }
+
+/* ---------- Auto schedule wizard ---------- */
+.as-mode-card{ background:var(--cream); border:2px solid transparent; border-radius:14px; padding:14px; margin-bottom:10px; }
+.as-mode-card.selected{ border-color:var(--lavender); background:var(--light-lavender); }
+.as-mode-title{ font-size:13.5px; font-weight:700; color:var(--dark); display:flex; align-items:center; gap:8px; margin-bottom:4px; cursor:pointer; }
+.as-mode-desc{ font-size:11.5px; color:var(--gray); line-height:1.5; margin-left:24px; }
+.as-radio{ width:16px; height:16px; border-radius:50%; border:2px solid #D8D5CD; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.as-radio.on{ border-color:var(--lavender); }
+.as-radio.on::after{ content:''; width:8px; height:8px; border-radius:50%; background:var(--lavender); }
+.as-config-panel{ background:#fff; border-radius:12px; padding:12px; margin-top:10px; }
+.as-config-item{ margin-bottom:16px; }
+.as-config-item:last-child{ margin-bottom:0; }
+.as-config-label{ font-size:12px; font-weight:700; color:var(--dark); margin-bottom:8px; }
+.as-chip-row{ display:flex; gap:6px; flex-wrap:wrap; }
+.as-chip{ font-size:11px; padding:6px 12px; border-radius:99px; background:#fff; border:1px solid rgba(55,53,47,0.12); color:var(--gray); cursor:pointer; }
+.as-chip.on{ background:var(--lavender); color:#fff; border-color:var(--lavender); }
+.as-count-row{ display:flex; gap:6px; }
+.as-count-btn{ flex:1; padding:9px; border-radius:9px; background:#fff; border:1px solid rgba(55,53,47,0.12); color:var(--medium); font-size:12.5px; font-weight:700; text-align:center; cursor:pointer; }
+.as-count-btn.on{ background:var(--dark); color:#fff; border-color:var(--dark); }
+.as-variety-option{ background:#fff; border:1.5px solid rgba(55,53,47,0.1); border-radius:10px; padding:10px 11px; margin-bottom:6px; cursor:pointer; }
+.as-variety-option.on{ border-color:var(--lavender); }
+.as-variety-title{ font-size:12px; font-weight:700; color:var(--dark); display:flex; align-items:center; gap:7px; }
+.as-variety-desc{ font-size:10.5px; color:var(--gray); margin-top:2px; margin-left:21px; }
+.as-mini-radio{ width:14px; height:14px; border-radius:50%; border:2px solid #D8D5CD; flex-shrink:0; }
+.as-mini-radio.on{ border-color:var(--lavender); position:relative; }
+.as-mini-radio.on::after{ content:''; position:absolute; top:2px; left:2px; width:6px; height:6px; border-radius:50%; background:var(--lavender); }
+.as-course-select{ margin:8px 0 0 21px; width:calc(100% - 21px); padding:7px 8px; border-radius:7px; border:1px solid rgba(55,53,47,0.12); font-size:11px; color:var(--dark); box-sizing:border-box; font-family:inherit; }
+.as-day-chip-row{ display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+.as-day-chip{ font-size:11px; width:32px; height:32px; border-radius:50%; background:#fff; border:1px solid rgba(55,53,47,0.12); color:var(--gray); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; }
+.as-day-chip.on{ background:var(--blue); color:#fff; border-color:var(--blue); }
+.as-time-slots{ display:flex; flex-direction:column; gap:8px; }
+.as-time-slot-row{ display:flex; align-items:center; gap:8px; }
+.as-time-slot-row .slot-label{ font-size:11.5px; color:var(--medium); font-weight:700; width:52px; flex-shrink:0; }
+.as-time-slot-row input[type=time]{ flex:1; padding:7px; border-radius:7px; border:1px solid rgba(55,53,47,0.12); font-size:12px; text-align:center; font-family:inherit; }
+.as-day-row{ display:flex; align-items:center; gap:8px; background:#fff; border-radius:10px; padding:9px 10px; margin-bottom:6px; }
+.as-day-row .as-day-label{ width:36px; font-size:12px; font-weight:700; color:var(--medium); flex-shrink:0; }
+.as-day-row select{ flex:1.3; padding:7px 6px; border-radius:7px; border:1px solid rgba(55,53,47,0.12); font-size:11px; color:var(--dark); font-family:inherit; }
+.as-day-row input[type=time]{ flex:1; padding:7px 4px; border-radius:7px; border:1px solid rgba(55,53,47,0.12); font-size:11px; color:var(--dark); font-family:inherit; }
+.as-preview-row{ display:flex; align-items:center; gap:10px; background:#fff; border-radius:10px; padding:10px 11px; margin-bottom:6px; }
+.as-preview-row .pr-name{ flex:1; font-size:12.5px; font-weight:700; color:var(--dark); }
+.as-preview-row .pr-time{ font-size:11.5px; color:var(--gray); }
+.as-generate-btn{ width:100%; padding:11px; border-radius:10px; border:none; background:var(--dark); color:#fff; font-family:inherit; font-size:13px; font-weight:700; margin-top:16px; cursor:pointer; }
+.as-note{ font-size:11px; color:var(--gray); margin-top:8px; line-height:1.6; }
+
+
+
 /* ---------- Course card (list items) ---------- */
 .course-card{
   background:#fff; border-radius:var(--radius); padding:16px 18px;
@@ -614,7 +685,7 @@ select.filter-select{
 
 <nav id="navBar">
   <button data-page="dashboard" class="active">總覽儀表板</button>
-  <button data-page="schedule">今日排程</button>
+  <button data-page="schedule">學習排程</button>
   <button data-page="list">課程清單</button>
   <button data-page="progress">課程進度</button>
   <button data-page="calendar">📅 加入行事曆</button>
@@ -649,8 +720,13 @@ select.filter-select{
     <div class="cal-grid" id="calGrid"></div>
     <div class="cal-daylist" id="calDayList"></div>
 
+    <button type="button" id="autoScheduleBtn" class="auto-schedule-btn">🪄 自動安排學習時間</button>
+
     <div class="section-title">✦ 今天推薦優先學習</div>
     <div class="today-panel" id="todayPanel"></div>
+
+    <div class="section-title">所有課程排程</div>
+    <div class="all-schedule-panel" id="allScheduleList"></div>
   </section>
 
   <!-- List -->
@@ -1031,6 +1107,17 @@ grant execute on function get_shared_state(uuid) to anon;</pre>
   </div>
 </div>
 
+<!-- Auto Schedule Wizard Modal -->
+<div class="modal-overlay" id="autoScheduleOverlay">
+  <div class="modal">
+    <h2>🪄 自動安排學習時間</h2>
+    <div id="autoScheduleBody"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-secondary" id="autoScheduleCloseBtn">關閉</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1045,6 +1132,7 @@ function markLocalChange(){
 let courses = [];
 let editingId = null;
 const WEEKDAY_NAMES = ['週日','週一','週二','週三','週四','週五','週六'];
+const DISPLAY_WEEKDAY_ORDER = [1,2,3,4,5,6,0]; // 週一 ~ 週日 for display purposes
 function formatDateShort(dateStr){
   if(!dateStr) return '';
   const parts = dateStr.split('-');
@@ -1176,6 +1264,17 @@ function daysUntil(dateStr){
   const d = new Date(dateStr); d.setHours(0,0,0,0);
   return Math.round((d - today) / 86400000);
 }
+function sortCoursesBy(list, sortBy){
+  const sorted = [...list];
+  sorted.sort((a,b)=>{
+    if(sortBy === 'progress') return b.progress - a.progress;
+    if(sortBy === 'name') return a.name.localeCompare(b.name, 'zh-Hant');
+    const da = a.dueDate ? daysUntil(a.dueDate) : 9999;
+    const db = b.dueDate ? daysUntil(b.dueDate) : 9999;
+    return da - db;
+  });
+  return sorted;
+}
 function statusOf(course){
   if(course.progress >= 100) return 'done';
   if(course.progress > 0) return 'doing';
@@ -1230,6 +1329,45 @@ function goToPage(pageName){
   document.getElementById('page-' + pageName).classList.add('active');
   renderAll();
 }
+document.getElementById('allScheduleList').addEventListener('click', (e)=>{
+  const row = e.target.closest('.sched-row');
+  if(!row) return;
+  const courseId = row.dataset.courseId;
+  const schedId = row.dataset.schedId;
+  const course = courses.find(c=>c.id === courseId);
+  if(!course) return;
+  const schedule = (course.recurring || []).find(s=>s.id === schedId);
+  if(!schedule) return;
+
+  if(e.target.closest('.sre-delete')){
+    if(!confirm(`確定要刪除「${displayName(course)}」的這筆排程嗎？`)) return;
+    course.recurring = course.recurring.filter(s=>s.id !== schedId);
+    saveCourses();
+    renderAll();
+    showToast('已刪除排程');
+    return;
+  }
+  if(e.target.closest('.sre-save')){
+    const weekdaySel = row.querySelector('.sre-weekday');
+    const timeInput = row.querySelector('.sre-time');
+    schedule.type = 'weekly';
+    schedule.weekday = parseInt(weekdaySel.value, 10);
+    schedule.time = timeInput.value || schedule.time;
+    saveCourses();
+    renderAll();
+    showToast('已更新排程');
+    return;
+  }
+  if(e.target.closest('[data-toggle-sched]')){
+    if(schedule.type === 'single' || schedule.type === 'range'){
+      // these types need the full course editor, not the lightweight inline weekday/time form
+      openModal(course.id);
+      return;
+    }
+    row.classList.toggle('expanded');
+  }
+});
+
 document.getElementById('navBar').addEventListener('click', (e)=>{
   const btn = e.target.closest('button[data-page]');
   if(!btn) return;
@@ -1402,7 +1540,8 @@ function renderPieChart(total, done, doing, todo){
   if(courses.length === 0){
     detailEl.innerHTML = '';
   } else {
-    const sorted = [...courses].sort((a,b)=>b.progress - a.progress);
+    const listSortBy = document.getElementById('sortSelect') ? document.getElementById('sortSelect').value : 'progress';
+    const sorted = sortCoursesBy(courses, listSortBy);
     detailEl.innerHTML = `
       <div class="doing-detail-title">所有課程進度</div>
       ${sorted.map(c => `
@@ -1535,7 +1674,438 @@ function renderSchedule(){
     todayPanel.innerHTML = todayPicks.map(courseCardHTML).join('');
     attachCardClicks(todayPanel);
   }
+
+  renderAllScheduleList();
 }
+
+function renderAllScheduleList(){
+  const container = document.getElementById('allScheduleList');
+  if(!container) return;
+
+  // flatten every course's recurring entries into one list
+  const rows = [];
+  courses.forEach(c=>{
+    (c.recurring || []).forEach(s=>{
+      rows.push({ course: c, schedule: s });
+    });
+  });
+
+  if(rows.length === 0){
+    container.innerHTML = `<div class="sched-empty">還沒有任何課程設定學習排程，可以在課程編輯裡新增，或用上面的「自動安排學習時間」。</div>`;
+    return;
+  }
+
+  // sort: weekly entries by weekday+time first, then single/range by date
+  const weekdayOrder = s => s.type === 'weekly' || !s.type ? (s.weekday === 0 ? 7 : s.weekday) : 99;
+  rows.sort((a,b)=>{
+    const wa = weekdayOrder(a.schedule), wb = weekdayOrder(b.schedule);
+    if(wa !== wb) return wa - wb;
+    return (a.schedule.time || '').localeCompare(b.schedule.time || '');
+  });
+
+  container.innerHTML = rows.map(({course, schedule})=>{
+    const tags = course.tags || [];
+    const firstTag = tags[0];
+    const tc = firstTag ? tagColor(firstTag) : null;
+    const tagBadge = firstTag ? `<span class="sr-tag" style="background:${tc.bg}; color:${tc.fg};">${escapeHTML(firstTag)}</span>` : '';
+    return `
+    <div class="sched-row" data-course-id="${course.id}" data-sched-id="${schedule.id}">
+      <div class="sched-row-main" data-toggle-sched="${schedule.id}">
+        <div class="sr-info">
+          <div class="sr-name">${escapeHTML(displayName(course))}</div>
+          <div class="sr-time">${formatSchedule(schedule)}</div>
+        </div>
+        ${tagBadge}
+        <span class="sr-edit">✎</span>
+      </div>
+      <div class="sched-row-edit">
+        <div class="sched-row-edit-fields">
+          <select class="sre-weekday">
+            ${WEEKDAY_NAMES.map((n,i)=>`<option value="${i}" ${schedule.weekday===i ? 'selected':''}>${n}</option>`).join('')}
+          </select>
+          <input type="time" class="sre-time" value="${schedule.time || '20:00'}">
+        </div>
+        <div class="modal-actions" style="margin-top:0;">
+          <button type="button" class="btn btn-secondary sre-delete">刪除這筆排程</button>
+          <button type="button" class="btn btn-primary sre-save">儲存</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ---------- Auto schedule wizard ----------
+let autoScheduleState = null;
+
+function defaultAutoScheduleState(){
+  return {
+    step: 'config', // 'config' | 'preview'
+    mode: 'auto', // 'auto' | 'custom'
+    tagScope: 'all', // 'all' | 'selected'
+    selectedTags: [],
+    countPerDay: 1,
+    variety: 'diff-tag', // 'diff-tag' | 'same-tag' | 'same-course'
+    varietyCourseId: '',
+    daysPreset: 'weekday', // 'weekday' | 'weekend' | 'everyday' | 'custom'
+    selectedWeekdays: [1,2,3,4,5],
+    times: ['20:00'],
+    customDays: DISPLAY_WEEKDAY_ORDER.map(w => ({ weekday: w, courseId: '', time: '20:00' })),
+    preview: null
+  };
+}
+
+function activeWeekdaysFor(state){
+  if(state.mode !== 'auto') return [];
+  if(state.daysPreset === 'weekday') return [1,2,3,4,5];
+  if(state.daysPreset === 'weekend') return [0,6];
+  if(state.daysPreset === 'everyday') return [0,1,2,3,4,5,6];
+  return state.selectedWeekdays;
+}
+
+function eligibleCoursesForSchedule(){
+  return courses.filter(c => statusOf(c) !== 'done');
+}
+
+function generateAutoSchedule(state){
+  const pool = eligibleCoursesForSchedule();
+  let candidates = pool;
+  if(state.tagScope === 'selected' && state.selectedTags.length > 0){
+    candidates = candidates.filter(c => (c.tags||[]).some(t => state.selectedTags.includes(t)));
+  }
+  if(candidates.length === 0) return [];
+
+  const days = activeWeekdaysFor(state);
+  const orderedDays = DISPLAY_WEEKDAY_ORDER.filter(d => days.includes(d));
+  if(orderedDays.length === 0) return [];
+
+  const results = [];
+
+  if(state.variety === 'same-course'){
+    const course = candidates.find(c=>c.id === state.varietyCourseId) || candidates[0];
+    orderedDays.forEach(day=>{
+      for(let slot=0; slot<state.countPerDay; slot++){
+        results.push({ courseId: course.id, courseName: displayName(course), weekday: day, time: state.times[slot] || state.times[0] || '20:00' });
+      }
+    });
+    return results;
+  }
+
+  // build tag -> courses map from candidates
+  const tagMap = {};
+  candidates.forEach(c=>{
+    const tags = (c.tags && c.tags.length) ? c.tags : ['未分類'];
+    tags.forEach(t=>{
+      if(!tagMap[t]) tagMap[t] = [];
+      if(!tagMap[t].includes(c)) tagMap[t].push(c);
+    });
+  });
+  const tagList = Object.keys(tagMap);
+  if(tagList.length === 0) return [];
+
+  // priority within a tag: more stalled / sooner due date goes first
+  function priorityScore(c){
+    const stalled = daysSince(c.lastActivity || c.startDate || '2000-01-01') || 0;
+    const dueSoon = c.dueDate ? (daysUntil(c.dueDate) ?? 9999) : 9999;
+    return dueSoon - stalled * 10;
+  }
+  tagList.forEach(t => tagMap[t].sort((a,b)=> priorityScore(a) - priorityScore(b)));
+
+  const tagCoursePointer = {};
+  tagList.forEach(t => tagCoursePointer[t] = 0);
+  let tagPointer = 0;
+
+  orderedDays.forEach(day=>{
+    const usedTagsToday = new Set();
+    for(let slot=0; slot<state.countPerDay; slot++){
+      let chosenTag;
+      if(state.variety === 'diff-tag'){
+        let attempts = 0;
+        do{
+          chosenTag = tagList[tagPointer % tagList.length];
+          tagPointer++;
+          attempts++;
+        } while(usedTagsToday.has(chosenTag) && attempts <= tagList.length);
+        usedTagsToday.add(chosenTag);
+      } else { // same-tag: one tag for the whole day
+        if(slot === 0){
+          chosenTag = tagList[tagPointer % tagList.length];
+          tagPointer++;
+          usedTagsToday.add(chosenTag);
+        } else {
+          chosenTag = [...usedTagsToday][0];
+        }
+      }
+      const coursesInTag = tagMap[chosenTag];
+      const idx = tagCoursePointer[chosenTag] % coursesInTag.length;
+      const course = coursesInTag[idx];
+      tagCoursePointer[chosenTag]++;
+      results.push({ courseId: course.id, courseName: displayName(course), weekday: day, time: state.times[slot] || state.times[0] || '20:00' });
+    }
+  });
+
+  return results;
+}
+
+function renderAutoScheduleBody(){
+  const body = document.getElementById('autoScheduleBody');
+  const s = autoScheduleState;
+  if(!s){ body.innerHTML = ''; return; }
+
+  if(s.step === 'preview'){
+    const rows = s.preview || [];
+    body.innerHTML = `
+      <p class="as-note" style="margin-bottom:12px;">會把以下 ${rows.length} 筆新增到對應課程的學習排程（不會刪掉原本已經有的排程）：</p>
+      ${rows.length === 0 ? `<div class="sched-empty">目前條件下沒有可以安排的課程，回上一步調整看看。</div>` :
+        rows.map(r => `
+          <div class="as-preview-row">
+            <span class="pr-name">${escapeHTML(r.courseName)}</span>
+            <span class="pr-time">${WEEKDAY_NAMES[r.weekday]} ${r.time}</span>
+          </div>
+        `).join('')
+      }
+      <div class="modal-actions" style="margin-top:14px;">
+        <button type="button" class="btn btn-secondary" id="asBackBtn">上一步</button>
+        <button type="button" class="btn btn-primary" id="asConfirmBtn" ${rows.length === 0 ? 'disabled' : ''}>確認套用</button>
+      </div>
+    `;
+    return;
+  }
+
+  if(s.mode === 'custom'){
+    const courseOptions = eligibleCoursesForSchedule();
+    body.innerHTML = `
+      <p class="as-mode-title" data-as-mode="auto"><span class="as-radio"></span>自動輪替</p>
+      <p class="as-mode-title selected-title" data-as-mode="custom" style="color:var(--lavender);"><span class="as-radio on"></span>自訂排程</p>
+      <p class="as-note" style="margin:6px 0 14px;">幫每一天決定要上哪堂課、排在幾點。選「不排課」的天數會跳過。</p>
+      ${s.customDays.map((d,i)=>`
+        <div class="as-day-row" data-day-index="${i}">
+          <span class="as-day-label">${WEEKDAY_NAMES[d.weekday]}</span>
+          <select class="as-custom-course">
+            <option value="">不排課</option>
+            ${courseOptions.map(c=>`<option value="${c.id}" ${d.courseId===c.id?'selected':''}>${escapeHTML(displayName(c))}</option>`).join('')}
+          </select>
+          <input type="time" class="as-custom-time" value="${d.time}" ${!d.courseId ? 'disabled style="opacity:.4;"' : ''}>
+        </div>
+      `).join('')}
+      <button type="button" class="as-generate-btn" id="asGenerateBtn">完成排程 ›</button>
+    `;
+    return;
+  }
+
+  // mode === 'auto'
+  const tagOptions = allTags || [];
+  body.innerHTML = `
+    <p class="as-mode-title selected-title" data-as-mode="auto" style="color:var(--lavender);"><span class="as-radio on"></span>自動輪替</p>
+    <div class="as-config-panel">
+
+      <div class="as-config-item">
+        <div class="as-config-label">標籤範圍</div>
+        <div class="as-chip-row">
+          <span class="as-chip ${s.tagScope==='all'?'on':''}" data-tag-scope-all="1">全部標籤</span>
+          ${tagOptions.map(t=>`<span class="as-chip ${s.tagScope==='selected' && s.selectedTags.includes(t)?'on':''}" data-tag-chip="${escapeHTML(t)}">${escapeHTML(t)}</span>`).join('')}
+        </div>
+      </div>
+
+      <div class="as-config-item">
+        <div class="as-config-label">一天排幾堂課</div>
+        <div class="as-count-row">
+          ${[1,2,3].map(n=>`<div class="as-count-btn ${s.countPerDay===n?'on':''}" data-count="${n}">${n} 堂</div>`).join('')}
+        </div>
+        ${s.countPerDay >= 2 ? `
+          <div style="margin-top:10px;">
+            <div class="as-variety-option ${s.variety==='diff-tag'?'on':''}" data-variety="diff-tag">
+              <div class="as-variety-title"><span class="as-mini-radio ${s.variety==='diff-tag'?'on':''}"></span>不同標籤</div>
+              <div class="as-variety-desc">每堂課刻意安排成不同類型，避免同天重複。</div>
+            </div>
+            <div class="as-variety-option ${s.variety==='same-tag'?'on':''}" data-variety="same-tag">
+              <div class="as-variety-title"><span class="as-mini-radio ${s.variety==='same-tag'?'on':''}"></span>同標籤，不同課</div>
+              <div class="as-variety-desc">都在同一個標籤範圍內，但盡量安排不同門課交替。</div>
+            </div>
+            <div class="as-variety-option ${s.variety==='same-course'?'on':''}" data-variety="same-course">
+              <div class="as-variety-title"><span class="as-mini-radio ${s.variety==='same-course'?'on':''}"></span>同一堂課（衝刺模式）</div>
+              <div class="as-variety-desc">整週都排同一門課，適合密集衝刺一門課。</div>
+              ${s.variety==='same-course' ? `
+                <select class="as-course-select" id="asVarietyCourseSelect">
+                  <option value="">選擇要衝刺的課程…</option>
+                  ${eligibleCoursesForSchedule().map(c=>`<option value="${c.id}" ${s.varietyCourseId===c.id?'selected':''}>${escapeHTML(displayName(c))}</option>`).join('')}
+                </select>
+              ` : ''}
+            </div>
+          </div>
+        ` : ''}
+      </div>
+
+      <div class="as-config-item">
+        <div class="as-config-label">一週排哪幾天</div>
+        <div class="as-chip-row">
+          <span class="as-chip ${s.daysPreset==='weekday'?'on':''}" data-day-preset="weekday">平日</span>
+          <span class="as-chip ${s.daysPreset==='weekend'?'on':''}" data-day-preset="weekend">週末</span>
+          <span class="as-chip ${s.daysPreset==='everyday'?'on':''}" data-day-preset="everyday">每天</span>
+          <span class="as-chip ${s.daysPreset==='custom'?'on':''}" data-day-preset="custom">自己選</span>
+        </div>
+        ${s.daysPreset === 'custom' ? `
+          <div class="as-day-chip-row">
+            ${DISPLAY_WEEKDAY_ORDER.map(w=>`<span class="as-day-chip ${s.selectedWeekdays.includes(w)?'on':''}" data-weekday-chip="${w}">${WEEKDAY_NAMES[w][1]}</span>`).join('')}
+          </div>
+        ` : ''}
+      </div>
+
+      <div class="as-config-item">
+        <div class="as-config-label">每堂課的時間</div>
+        <div class="as-time-slots">
+          ${Array.from({length: s.countPerDay}).map((_,i)=>`
+            <div class="as-time-slot-row">
+              <span class="slot-label">第 ${i+1} 堂</span>
+              <input type="time" class="as-time-input" data-slot-index="${i}" value="${s.times[i] || '20:00'}">
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+    </div>
+
+    <p class="as-mode-title" data-as-mode="custom" style="margin-top:14px;"><span class="as-radio"></span>改用自訂排程（完全手動）</p>
+
+    <button type="button" class="as-generate-btn" id="asGenerateBtn">產生排程建議 ›</button>
+  `;
+}
+
+function openAutoScheduleModal(){
+  autoScheduleState = defaultAutoScheduleState();
+  renderAutoScheduleBody();
+  document.getElementById('autoScheduleOverlay').classList.add('open');
+}
+document.getElementById('autoScheduleBtn').addEventListener('click', openAutoScheduleModal);
+document.getElementById('autoScheduleCloseBtn').addEventListener('click', ()=>{
+  document.getElementById('autoScheduleOverlay').classList.remove('open');
+});
+document.getElementById('autoScheduleOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'autoScheduleOverlay') document.getElementById('autoScheduleOverlay').classList.remove('open');
+});
+
+document.getElementById('autoScheduleBody').addEventListener('click', (e)=>{
+  const s = autoScheduleState;
+  if(!s) return;
+
+  const modeEl = e.target.closest('[data-as-mode]');
+  if(modeEl){
+    s.mode = modeEl.dataset.asMode;
+    renderAutoScheduleBody();
+    return;
+  }
+  const tagScopeAll = e.target.closest('[data-tag-scope-all]');
+  if(tagScopeAll){
+    s.tagScope = 'all';
+    s.selectedTags = [];
+    renderAutoScheduleBody();
+    return;
+  }
+  const tagChip = e.target.closest('[data-tag-chip]');
+  if(tagChip){
+    const t = tagChip.dataset.tagChip;
+    s.tagScope = 'selected';
+    if(s.selectedTags.includes(t)) s.selectedTags = s.selectedTags.filter(x=>x!==t);
+    else s.selectedTags.push(t);
+    if(s.selectedTags.length === 0) s.tagScope = 'all';
+    renderAutoScheduleBody();
+    return;
+  }
+  const countBtn = e.target.closest('[data-count]');
+  if(countBtn){
+    s.countPerDay = parseInt(countBtn.dataset.count, 10);
+    if(s.times.length < s.countPerDay){
+      while(s.times.length < s.countPerDay) s.times.push(s.times[s.times.length-1] || '20:00');
+    } else {
+      s.times = s.times.slice(0, s.countPerDay);
+    }
+    if(s.countPerDay < 2) s.variety = 'diff-tag';
+    renderAutoScheduleBody();
+    return;
+  }
+  const varietyEl = e.target.closest('[data-variety]');
+  if(varietyEl){
+    s.variety = varietyEl.dataset.variety;
+    renderAutoScheduleBody();
+    return;
+  }
+  const dayPresetEl = e.target.closest('[data-day-preset]');
+  if(dayPresetEl){
+    s.daysPreset = dayPresetEl.dataset.dayPreset;
+    if(s.daysPreset === 'custom' && s.selectedWeekdays.length === 0) s.selectedWeekdays = [1,2,3,4,5];
+    renderAutoScheduleBody();
+    return;
+  }
+  const weekdayChip = e.target.closest('[data-weekday-chip]');
+  if(weekdayChip){
+    const w = parseInt(weekdayChip.dataset.weekdayChip, 10);
+    if(s.selectedWeekdays.includes(w)) s.selectedWeekdays = s.selectedWeekdays.filter(x=>x!==w);
+    else s.selectedWeekdays.push(w);
+    renderAutoScheduleBody();
+    return;
+  }
+  if(e.target.id === 'asGenerateBtn'){
+    if(s.mode === 'custom'){
+      const rows = s.customDays.filter(d=>d.courseId).map(d=>{
+        const course = courses.find(c=>c.id===d.courseId);
+        return { courseId: d.courseId, courseName: course ? displayName(course) : '', weekday: d.weekday, time: d.time };
+      });
+      s.preview = rows;
+    } else {
+      if(s.variety === 'same-course' && !s.varietyCourseId){
+        showToast('請先選擇要衝刺的課程');
+        return;
+      }
+      s.preview = generateAutoSchedule(s);
+    }
+    s.step = 'preview';
+    renderAutoScheduleBody();
+    return;
+  }
+  if(e.target.id === 'asBackBtn'){
+    s.step = 'config';
+    renderAutoScheduleBody();
+    return;
+  }
+  if(e.target.id === 'asConfirmBtn'){
+    (s.preview || []).forEach(r=>{
+      const course = courses.find(c=>c.id === r.courseId);
+      if(!course) return;
+      if(!course.recurring) course.recurring = [];
+      course.recurring.push({ id: scheduleUid(), type: 'weekly', weekday: r.weekday, time: r.time });
+    });
+    saveCourses();
+    renderAll();
+    document.getElementById('autoScheduleOverlay').classList.remove('open');
+    showToast(`已新增 ${(s.preview||[]).length} 筆學習排程`);
+    return;
+  }
+});
+
+document.getElementById('autoScheduleBody').addEventListener('change', (e)=>{
+  const s = autoScheduleState;
+  if(!s) return;
+
+  if(e.target.id === 'asVarietyCourseSelect'){
+    s.varietyCourseId = e.target.value;
+    return;
+  }
+  if(e.target.classList.contains('as-time-input')){
+    const idx = parseInt(e.target.dataset.slotIndex, 10);
+    s.times[idx] = e.target.value;
+    return;
+  }
+  const dayRow = e.target.closest('[data-day-index]');
+  if(dayRow){
+    const idx = parseInt(dayRow.dataset.dayIndex, 10);
+    if(e.target.classList.contains('as-custom-course')){
+      s.customDays[idx].courseId = e.target.value;
+      renderAutoScheduleBody();
+    } else if(e.target.classList.contains('as-custom-time')){
+      s.customDays[idx].time = e.target.value;
+    }
+  }
+});
+
 document.getElementById('calPrev').addEventListener('click', ()=>{
   initCalIfNeeded();
   calMonth--; if(calMonth < 0){ calMonth = 11; calYear--; }
@@ -1605,6 +2175,18 @@ function renderTagPieChart(){
   `;
 }
 
+function sortCoursesBy(list, sortBy){
+  const copy = [...list];
+  copy.sort((a,b)=>{
+    if(sortBy === 'progress') return b.progress - a.progress;
+    if(sortBy === 'name') return a.name.localeCompare(b.name, 'zh-Hant');
+    const da = a.dueDate ? daysUntil(a.dueDate) : 9999;
+    const db = b.dueDate ? daysUntil(b.dueDate) : 9999;
+    return da - db;
+  });
+  return copy;
+}
+
 function renderList(){
   renderTagPieChart();
   const q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
@@ -1617,13 +2199,7 @@ function renderList(){
     return matchQ && matchS;
   });
 
-  filtered.sort((a,b)=>{
-    if(sortBy === 'progress') return b.progress - a.progress;
-    if(sortBy === 'name') return a.name.localeCompare(b.name, 'zh-Hant');
-    const da = a.dueDate ? daysUntil(a.dueDate) : 9999;
-    const db = b.dueDate ? daysUntil(b.dueDate) : 9999;
-    return da - db;
-  });
+  filtered = sortCoursesBy(filtered, sortBy);
 
   const container = document.getElementById('listContainer');
   if(filtered.length === 0){
@@ -2373,7 +2949,7 @@ document.getElementById('deleteBtn').addEventListener('click', ()=>{
 // ---------- List filters ----------
 document.getElementById('searchInput').addEventListener('input', renderList);
 document.getElementById('statusFilter').addEventListener('change', renderList);
-document.getElementById('sortSelect').addEventListener('change', renderList);
+document.getElementById('sortSelect').addEventListener('change', ()=>{ renderList(); renderDashboard(); });
 
 // ---------- Export / Import ----------
 document.getElementById('exportBtn').addEventListener('click', ()=>{
