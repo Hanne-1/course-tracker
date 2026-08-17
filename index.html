@@ -223,10 +223,13 @@ main{max-width:960px; margin:0 auto; padding:22px 20px 40px;}
 .as-day-row .as-day-label{ width:36px; font-size:12px; font-weight:700; color:var(--medium); flex-shrink:0; }
 .as-day-row select{ flex:1.3; padding:7px 6px; border-radius:7px; border:1px solid rgba(55,53,47,0.12); font-size:11px; color:var(--dark); font-family:inherit; }
 .as-day-row input[type=time]{ flex:1; padding:7px 4px; border-radius:7px; border:1px solid rgba(55,53,47,0.12); font-size:11px; color:var(--dark); font-family:inherit; }
-.as-preview-row{ display:flex; align-items:center; gap:10px; background:#fff; border-radius:10px; padding:10px 11px; margin-bottom:6px; }
-.as-preview-row .pr-name{ flex:1; font-size:12.5px; font-weight:700; color:var(--dark); }
-.as-preview-row .pr-time{ font-size:11.5px; color:var(--gray); }
+.as-preview-row{ display:flex; align-items:center; gap:8px; background:#fff; border-radius:10px; padding:9px 10px; margin-bottom:6px; }
+.as-preview-row .pr-day{ font-size:11.5px; font-weight:700; color:var(--medium); width:32px; flex-shrink:0; }
+.as-preview-row .pr-course-select{ flex:1.4; min-width:0; padding:7px 6px; border-radius:7px; border:1px solid rgba(55,53,47,0.12); font-size:11.5px; color:var(--dark); font-family:inherit; }
+.as-preview-row .pr-time-input{ flex:0.8; padding:7px 4px; border-radius:7px; border:1px solid rgba(55,53,47,0.12); font-size:11.5px; color:var(--dark); font-family:inherit; }
 .as-generate-btn{ width:100%; padding:11px; border-radius:10px; border:none; background:var(--dark); color:#fff; font-family:inherit; font-size:13px; font-weight:700; margin-top:16px; cursor:pointer; }
+.as-clear-checkbox{ display:flex; align-items:flex-start; gap:8px; font-size:11.5px; color:var(--medium); line-height:1.6; margin-top:12px; cursor:pointer; }
+.as-clear-checkbox input{ margin-top:2px; flex-shrink:0; }
 .as-note{ font-size:11px; color:var(--gray); margin-top:8px; line-height:1.6; }
 
 
@@ -1750,7 +1753,8 @@ function defaultAutoScheduleState(){
     selectedWeekdays: [1,2,3,4,5],
     times: ['20:00'],
     customDays: DISPLAY_WEEKDAY_ORDER.map(w => ({ weekday: w, courseId: '', time: '20:00' })),
-    preview: null
+    preview: null,
+    clearExisting: false
   };
 }
 
@@ -1853,16 +1857,26 @@ function renderAutoScheduleBody(){
 
   if(s.step === 'preview'){
     const rows = s.preview || [];
+    const courseOptions = eligibleCoursesForSchedule();
     body.innerHTML = `
-      <p class="as-note" style="margin-bottom:12px;">會把以下 ${rows.length} 筆新增到對應課程的學習排程（不會刪掉原本已經有的排程）：</p>
+      <p class="as-note" style="margin-bottom:6px;">會把以下 ${rows.length} 筆新增到對應課程的學習排程。系統是依標籤輪替、優先排「久沒動作」或「快到期」的課程，覺得哪筆不對，可以直接在下面改課程或時間：</p>
       ${rows.length === 0 ? `<div class="sched-empty">目前條件下沒有可以安排的課程，回上一步調整看看。</div>` :
-        rows.map(r => `
-          <div class="as-preview-row">
-            <span class="pr-name">${escapeHTML(r.courseName)}</span>
-            <span class="pr-time">${WEEKDAY_NAMES[r.weekday]} ${r.time}</span>
+        rows.map((r,i) => `
+          <div class="as-preview-row" data-preview-index="${i}">
+            <span class="pr-day">${WEEKDAY_NAMES[r.weekday]}</span>
+            <select class="pr-course-select">
+              ${courseOptions.map(c=>`<option value="${c.id}" ${r.courseId===c.id?'selected':''}>${escapeHTML(displayName(c))}</option>`).join('')}
+            </select>
+            <input type="time" class="pr-time-input" value="${r.time}">
           </div>
         `).join('')
       }
+      ${rows.length > 0 ? `
+        <label class="as-clear-checkbox">
+          <input type="checkbox" id="asClearExisting" ${s.clearExisting ? 'checked' : ''}>
+          套用時，先清空這幾堂課原本的排程（避免新舊重複）
+        </label>
+      ` : ''}
       <div class="modal-actions" style="margin-top:14px;">
         <button type="button" class="btn btn-secondary" id="asBackBtn">上一步</button>
         <button type="button" class="btn btn-primary" id="asConfirmBtn" ${rows.length === 0 ? 'disabled' : ''}>確認套用</button>
@@ -1986,6 +2000,7 @@ document.getElementById('autoScheduleOverlay').addEventListener('click', (e)=>{
 document.getElementById('autoScheduleBody').addEventListener('click', (e)=>{
   const s = autoScheduleState;
   if(!s) return;
+  if(e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return; // let native form controls behave normally, don't let clicks bubble into the toggle logic below
 
   const modeEl = e.target.closest('[data-as-mode]');
   if(modeEl){
@@ -2067,7 +2082,15 @@ document.getElementById('autoScheduleBody').addEventListener('click', (e)=>{
     return;
   }
   if(e.target.id === 'asConfirmBtn'){
-    (s.preview || []).forEach(r=>{
+    const rows = s.preview || [];
+    if(s.clearExisting){
+      const affectedCourseIds = new Set(rows.map(r=>r.courseId));
+      affectedCourseIds.forEach(id=>{
+        const course = courses.find(c=>c.id === id);
+        if(course) course.recurring = [];
+      });
+    }
+    rows.forEach(r=>{
       const course = courses.find(c=>c.id === r.courseId);
       if(!course) return;
       if(!course.recurring) course.recurring = [];
@@ -2076,7 +2099,7 @@ document.getElementById('autoScheduleBody').addEventListener('click', (e)=>{
     saveCourses();
     renderAll();
     document.getElementById('autoScheduleOverlay').classList.remove('open');
-    showToast(`已新增 ${(s.preview||[]).length} 筆學習排程`);
+    showToast(`已新增 ${rows.length} 筆學習排程${s.clearExisting ? '（已先清空這幾堂課原本的排程）' : ''}`);
     return;
   }
 });
@@ -2089,9 +2112,25 @@ document.getElementById('autoScheduleBody').addEventListener('change', (e)=>{
     s.varietyCourseId = e.target.value;
     return;
   }
+  if(e.target.id === 'asClearExisting'){
+    s.clearExisting = e.target.checked;
+    return;
+  }
   if(e.target.classList.contains('as-time-input')){
     const idx = parseInt(e.target.dataset.slotIndex, 10);
     s.times[idx] = e.target.value;
+    return;
+  }
+  const previewRow = e.target.closest('[data-preview-index]');
+  if(previewRow){
+    const idx = parseInt(previewRow.dataset.previewIndex, 10);
+    if(e.target.classList.contains('pr-course-select')){
+      const course = courses.find(c=>c.id === e.target.value);
+      s.preview[idx].courseId = e.target.value;
+      s.preview[idx].courseName = course ? displayName(course) : '';
+    } else if(e.target.classList.contains('pr-time-input')){
+      s.preview[idx].time = e.target.value;
+    }
     return;
   }
   const dayRow = e.target.closest('[data-day-index]');
