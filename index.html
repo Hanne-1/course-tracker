@@ -723,7 +723,7 @@ select.filter-select{
     <div class="cal-grid" id="calGrid"></div>
     <div class="cal-daylist" id="calDayList"></div>
 
-    <button type="button" id="autoScheduleBtn" class="auto-schedule-btn">🪄 自動安排學習時間</button>
+    <button type="button" id="autoScheduleBtn" class="auto-schedule-btn">🪄 安排學習時間</button>
 
     <div class="section-title">✦ 今天推薦優先學習</div>
     <div class="today-panel" id="todayPanel"></div>
@@ -739,12 +739,6 @@ select.filter-select{
 
     <div class="toolbar">
       <input type="text" class="search-box" id="searchInput" placeholder="搜尋課程名稱…">
-      <select class="filter-select" id="statusFilter">
-        <option value="all">全部狀態</option>
-        <option value="todo">未開始</option>
-        <option value="doing">進行中</option>
-        <option value="done">已完成</option>
-      </select>
       <select class="filter-select" id="sortSelect">
         <option value="due">依到期日排序</option>
         <option value="progress">依進度排序</option>
@@ -1082,7 +1076,7 @@ grant execute on function get_shared_state(uuid) to anon;</pre>
 <!-- Auto Schedule Wizard Modal -->
 <div class="modal-overlay" id="autoScheduleOverlay">
   <div class="modal">
-    <h2>🪄 自動安排學習時間</h2>
+    <h2>🪄 安排學習時間</h2>
     <div id="autoScheduleBody"></div>
     <div class="modal-actions">
       <button type="button" class="btn btn-secondary" id="autoScheduleCloseBtn">關閉</button>
@@ -1124,7 +1118,8 @@ function formatSchedule(s){
 function scheduleOccursOn(s, dateStr, weekday){
   if(s.type === 'single') return s.date === dateStr;
   if(s.type === 'range') return dateStr >= s.startDate && dateStr <= s.endDate;
-  return s.weekday === weekday; // 'weekly' (also backward-compatible default)
+  // 'weekly' (also backward-compatible default)
+  return s.weekday === weekday;
 }
 function displayName(c){
   return (c.alias && c.alias.trim()) ? c.alias.trim() : c.name;
@@ -1164,6 +1159,13 @@ function loadCourses(){
   }catch(e){ courses = []; }
 }
 function saveCourses(){
+  // Once a course is marked done, its schedule (固定上課時間) has no more purpose —
+  // auto-clear it so it stops appearing in the schedule list and stops syncing to the calendar feed.
+  courses.forEach(c=>{
+    if(statusOf(c) === 'done' && c.recurring && c.recurring.length > 0){
+      c.recurring = [];
+    }
+  });
   localStorage.setItem(STORAGE_KEY, JSON.stringify(courses));
   markLocalChange();
   triggerCloudPush();
@@ -1246,6 +1248,11 @@ function sortCoursesBy(list, sortBy){
     return da - db;
   });
   return sorted;
+}
+function clearScheduleIfDone(course){
+  if(course.progress >= 100 && course.recurring && course.recurring.length > 0){
+    course.recurring = [];
+  }
 }
 function statusOf(course){
   if(course.progress >= 100) return 'done';
@@ -1339,6 +1346,7 @@ document.getElementById('allScheduleList').addEventListener('click', (e)=>{
     row.classList.toggle('expanded');
   }
 });
+
 
 document.getElementById('navBar').addEventListener('click', (e)=>{
   const btn = e.target.closest('button[data-page]');
@@ -1620,7 +1628,7 @@ function renderSchedule(){
     });
   });
 
-  // Today panel: auto-schedule — today's recurring classes first, then stalled, then nearest deadline
+  // Today panel: auto-schedule — today's recurring classes first, then due soon, then stalled
   const todayRecurIds = new Set(
     courses.filter(c => (c.recurring || []).some(s => scheduleOccursOn(s, todayStr, todayWeekday))).map(c=>c.id)
   );
@@ -1630,12 +1638,12 @@ function renderSchedule(){
       const ra = todayRecurIds.has(a.id) ? 0 : 1;
       const rb = todayRecurIds.has(b.id) ? 0 : 1;
       if(ra !== rb) return ra - rb;
-      const sa = isStalled(a) ? 0 : 1;
-      const sb = isStalled(b) ? 0 : 1;
-      if(sa !== sb) return sa - sb;
       const da = a.dueDate ? daysUntil(a.dueDate) : 9999;
       const db = b.dueDate ? daysUntil(b.dueDate) : 9999;
-      return da - db;
+      if(da !== db) return da - db;
+      const sa = isStalled(a) ? 0 : 1;
+      const sb = isStalled(b) ? 0 : 1;
+      return sa - sb;
     })
     .slice(0,5);
 
@@ -1648,6 +1656,16 @@ function renderSchedule(){
   }
 
   renderAllScheduleList();
+}
+
+function todayStr(){
+  return new Date().toISOString().slice(0,10);
+}
+function nextOccurrenceDate(weekday){
+  const d = new Date();
+  const diff = (weekday - d.getDay() + 7) % 7;
+  d.setDate(d.getDate() + diff);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
 function renderAllScheduleList(){
@@ -1663,12 +1681,15 @@ function renderAllScheduleList(){
   });
 
   if(rows.length === 0){
-    container.innerHTML = `<div class="sched-empty">還沒有任何課程設定學習排程，可以在課程編輯裡新增，或用上面的「自動安排學習時間」。</div>`;
+    container.innerHTML = `<div class="sched-empty">還沒有任何課程設定學習排程，可以用上面的「安排學習時間」。</div>`;
     return;
   }
 
   // sort: weekly entries by weekday+time first, then single/range by date
-  const weekdayOrder = s => s.type === 'weekly' || !s.type ? (s.weekday === 0 ? 7 : s.weekday) : 99;
+  const weekdayOrder = s => {
+    if(s.type === 'weekly' || !s.type) return s.weekday === 0 ? 7 : s.weekday;
+    return 99;
+  };
   rows.sort((a,b)=>{
     const wa = weekdayOrder(a.schedule), wb = weekdayOrder(b.schedule);
     if(wa !== wb) return wa - wb;
@@ -2198,13 +2219,10 @@ function sortCoursesBy(list, sortBy){
 function renderList(){
   renderTagPieChart();
   const q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
-  const statusF = document.getElementById('statusFilter').value;
   const sortBy = document.getElementById('sortSelect').value;
 
   let filtered = courses.filter(c=>{
-    const matchQ = c.name.toLowerCase().includes(q);
-    const matchS = statusF === 'all' || statusOf(c) === statusF;
-    return matchQ && matchS;
+    return c.name.toLowerCase().includes(q);
   });
 
   filtered = sortCoursesBy(filtered, sortBy);
@@ -2314,6 +2332,7 @@ function toggleChecklistItemDirect(courseId, itemId, doneVal){
   item.done = doneVal;
   const computed = computeProgressFromItems(course.items);
   if(computed !== null) course.progress = computed;
+  clearScheduleIfDone(course);
   course.lastActivity = new Date().toISOString().slice(0,10);
   saveCourses();
   renderAll();
@@ -2726,7 +2745,27 @@ function compareSortKeys(a, b){
   return 0;
 }
 function sortDraftItemsByNumber(){
-  draftItems.sort((x, y) => compareSortKeys(extractSortKey(x.text), extractSortKey(y.text)));
+  // Headers stay fixed in place as section anchors — only the items directly under
+  // each header get reordered among themselves. This avoids a header's own incidental
+  // numbers (a version number, a duration like "1:49:35") being mistaken for a chapter
+  // number and shuffling the header itself out of place.
+  const result = [];
+  let buffer = [];
+  function flushBuffer(){
+    buffer.sort((x, y) => compareSortKeys(extractSortKey(x.text), extractSortKey(y.text)));
+    result.push(...buffer);
+    buffer = [];
+  }
+  draftItems.forEach(node => {
+    if(node.type === 'header'){
+      flushBuffer();
+      result.push(node);
+    } else {
+      buffer.push(node);
+    }
+  });
+  flushBuffer();
+  draftItems = result;
 }
 
 function addLinesAsType(forcedType){
@@ -2861,6 +2900,7 @@ document.getElementById('courseForm').addEventListener('submit', (e)=>{
     tags: draftTags,
     lastActivity: new Date().toISOString().slice(0,10)
   };
+  if(data.progress >= 100) data.recurring = [];
   if(id){
     const idx = courses.findIndex(c=>c.id === id);
     courses[idx] = {...courses[idx], ...data};
@@ -2886,7 +2926,6 @@ document.getElementById('deleteBtn').addEventListener('click', ()=>{
 
 // ---------- List filters ----------
 document.getElementById('searchInput').addEventListener('input', renderList);
-document.getElementById('statusFilter').addEventListener('change', renderList);
 document.getElementById('sortSelect').addEventListener('change', ()=>{ renderList(); renderDashboard(); });
 
 // ---------- Export / Import ----------
