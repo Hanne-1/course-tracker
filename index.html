@@ -898,6 +898,12 @@ select.filter-select{
         </div>
         <div class="checklist-box" id="courseChapterBody" style="display:none;">
           <div class="checklist-bulk">
+            <div id="targetHeaderRow" style="display:none; margin-bottom:8px;">
+              <label class="field-hint" style="display:block; margin-bottom:4px;">新增子項目時，要加到哪個大標題底下？</label>
+              <select id="targetHeaderSelect" style="width:100%; padding:8px 10px; border-radius:8px; border:1px solid rgba(55,53,47,0.12); font-family:inherit; font-size:12.5px; color:var(--dark);">
+                <option value="">（加到最後）</option>
+              </select>
+            </div>
             <textarea id="bulkItemInput" placeholder="填入課程大綱後，記得回來勾選完成，幫助你紀錄課程進度呦！"></textarea>
             <div class="checklist-bulk-row">
               <div class="bulk-btn-group">
@@ -2626,6 +2632,24 @@ function itemUid(){ return 'i_' + Date.now() + '_' + Math.random().toString(36).
 
 let dragId = null;
 
+function updateTargetHeaderOptions(){
+  const row = document.getElementById('targetHeaderRow');
+  const select = document.getElementById('targetHeaderSelect');
+  if(!row || !select) return;
+  const headers = draftItems.filter(n => n.type === 'header');
+  const prevValue = select.value;
+  if(headers.length === 0){
+    row.style.display = 'none';
+    select.innerHTML = '<option value="">（加到最後）</option>';
+    return;
+  }
+  row.style.display = 'block';
+  select.innerHTML = '<option value="">（加到最後）</option>' +
+    headers.map(h => `<option value="${h.id}">${escapeHTML(h.text)}</option>`).join('');
+  // keep the user's previous selection if that header still exists
+  if(headers.some(h => h.id === prevValue)) select.value = prevValue;
+}
+
 function renderChecklist(){
   const container = document.getElementById('checklistItems');
   if(draftItems.length === 0){
@@ -2679,6 +2703,7 @@ function renderChecklist(){
       });
     });
   }
+  updateTargetHeaderOptions();
   syncProgressUI();
 }
 
@@ -2775,7 +2800,27 @@ function addLinesAsType(forcedType){
     showToast('請先在框裡填入內容');
     return;
   }
-  lines.forEach(text => draftItems.push({id: itemUid(), text, done:false, type: forcedType}));
+  const newNodes = lines.map(text => ({id: itemUid(), text, done:false, type: forcedType}));
+
+  let insertedIntoSection = false;
+  if(forcedType === 'item'){
+    const targetHeaderId = document.getElementById('targetHeaderSelect').value;
+    if(targetHeaderId){
+      const headerIndex = draftItems.findIndex(n => n.id === targetHeaderId);
+      if(headerIndex !== -1){
+        let insertIndex = headerIndex + 1;
+        while(insertIndex < draftItems.length && draftItems[insertIndex].type !== 'header'){
+          insertIndex++;
+        }
+        draftItems.splice(insertIndex, 0, ...newNodes);
+        insertedIntoSection = true;
+      }
+    }
+  }
+  if(!insertedIntoSection){
+    draftItems.push(...newNodes);
+  }
+
   textarea.value = '';
   sortDraftItemsByNumber();
   renderChecklist();
