@@ -296,6 +296,21 @@ main{max-width:960px; margin:0 auto; padding:22px 20px 40px;}
 .button-help-text{
   font-size:11.5px; color:var(--gray); line-height:1.6; margin-top:8px;
 }
+.checklist-mark-all-row{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  margin:10px 0 12px; padding:10px 12px; background:var(--light-sage); border-radius:10px;
+}
+.checklist-mark-all-row #markAllDoneBtn{
+  padding:7px 14px; border-radius:8px; border:none; background:var(--sage); color:#fff;
+  font-family:inherit; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap;
+}
+.header-checkbox{ flex-shrink:0; margin-right:2px; }
+.section-collapse-btn{
+  flex-shrink:0; width:20px; height:20px; border:none; background:transparent;
+  color:var(--medium); font-size:11px; cursor:pointer; display:flex; align-items:center;
+  justify-content:center; transition:transform .15s;
+}
+.section-collapse-btn.collapsed{ transform:rotate(-90deg); }
 .pi-name{ flex:1 1 110px; font-size:14.5px; font-weight:700; color:var(--dark); min-width:110px;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .pi-progress-mini{ display:flex; align-items:center; gap:6px; width:90px; flex-shrink:0; }
@@ -743,6 +758,8 @@ select.filter-select{
         <option value="due">依到期日排序</option>
         <option value="progress">依進度排序</option>
         <option value="name">依名稱排序</option>
+        <option value="duration-desc">時長最長排序</option>
+        <option value="duration-asc">時長最短排序</option>
       </select>
     </div>
     <div id="listContainer"></div>
@@ -915,6 +932,10 @@ select.filter-select{
             <div class="button-help-text">
               自動新增：依編號自動判斷大標題或子項目。新增大標題／新增子項目：整段文字直接變成該類型。每行＝一個項目。
             </div>
+          </div>
+          <div class="checklist-mark-all-row">
+            <span class="field-hint">課程已經上完了？</span>
+            <button type="button" id="markAllDoneBtn">✓ 全部標記完成</button>
           </div>
           <div class="checklist-items" id="checklistItems"></div>
         </div>
@@ -1243,17 +1264,6 @@ function daysUntil(dateStr){
   const today = new Date(); today.setHours(0,0,0,0);
   const d = new Date(dateStr); d.setHours(0,0,0,0);
   return Math.round((d - today) / 86400000);
-}
-function sortCoursesBy(list, sortBy){
-  const sorted = [...list];
-  sorted.sort((a,b)=>{
-    if(sortBy === 'progress') return b.progress - a.progress;
-    if(sortBy === 'name') return a.name.localeCompare(b.name, 'zh-Hant');
-    const da = a.dueDate ? daysUntil(a.dueDate) : 9999;
-    const db = b.dueDate ? daysUntil(b.dueDate) : 9999;
-    return da - db;
-  });
-  return sorted;
 }
 function clearScheduleIfDone(course){
   if(course.progress >= 100 && course.recurring && course.recurring.length > 0){
@@ -2210,11 +2220,25 @@ function renderTagPieChart(){
   `;
 }
 
+function durationToMinutes(dur){
+  if(!dur) return 0;
+  if(typeof dur === 'string'){
+    const parsed = parseDurationForEdit(dur);
+    return (parseFloat(parsed.d)||0)*1440 + (parseFloat(parsed.h)||0)*60 + (parseFloat(parsed.m)||0) + (parseFloat(parsed.s)||0)/60;
+  }
+  return (dur.d||0)*1440 + (dur.h||0)*60 + (dur.m||0) + (dur.s||0)/60;
+}
 function sortCoursesBy(list, sortBy){
   const copy = [...list];
   copy.sort((a,b)=>{
     if(sortBy === 'progress') return b.progress - a.progress;
     if(sortBy === 'name') return a.name.localeCompare(b.name, 'zh-Hant');
+    if(sortBy === 'duration-desc') return durationToMinutes(b.duration) - durationToMinutes(a.duration);
+    if(sortBy === 'duration-asc'){
+      const ma = durationToMinutes(a.duration) || Infinity; // no duration set → push to the end, don't let it look like "shortest"
+      const mb = durationToMinutes(b.duration) || Infinity;
+      return ma - mb;
+    }
     const da = a.dueDate ? daysUntil(a.dueDate) : 9999;
     const db = b.dueDate ? daysUntil(b.dueDate) : 9999;
     return da - db;
@@ -2631,6 +2655,7 @@ document.getElementById('courseChapterToggle').addEventListener('click', ()=>{
 function itemUid(){ return 'i_' + Date.now() + '_' + Math.random().toString(36).slice(2,6); }
 
 let dragId = null;
+let collapsedHeaderIds = new Set();
 
 function updateTargetHeaderOptions(){
   const row = document.getElementById('targetHeaderRow');
@@ -2650,36 +2675,80 @@ function updateTargetHeaderOptions(){
   if(headers.some(h => h.id === prevValue)) select.value = prevValue;
 }
 
+function sectionItemsForHeader(headerId){
+  const idx = draftItems.findIndex(n => n.id === headerId);
+  if(idx === -1) return [];
+  const items = [];
+  for(let i = idx + 1; i < draftItems.length && draftItems[i].type !== 'header'; i++){
+    items.push(draftItems[i]);
+  }
+  return items;
+}
+
 function renderChecklist(){
   const container = document.getElementById('checklistItems');
   if(draftItems.length === 0){
     container.innerHTML = `<div class="checklist-empty">還沒有加入大綱項目，貼上課綱或手動新增後，會依子項目勾選比例自動計算進度。</div>`;
   } else {
-    container.innerHTML = draftItems.map((item) => {
+    const rowsHTML = [];
+    let sectionCollapsed = false;
+    draftItems.forEach((item) => {
       const isHeader = item.type === 'header';
+      if(isHeader){
+        sectionCollapsed = collapsedHeaderIds.has(item.id);
+      } else if(sectionCollapsed){
+        return; // this item's header section is collapsed — skip rendering it
+      }
       let rowClass = isHeader ? 'header-row' : 'child-row' + (item.done ? ' checked' : '');
       if(item.id === dragId) rowClass += ' dragging';
-      const checkbox = isHeader ? '' : `<input type="checkbox" ${item.done ? 'checked' : ''}>`;
+      let checkbox;
+      if(isHeader){
+        const sectionItems = sectionItemsForHeader(item.id);
+        const allDone = sectionItems.length > 0 && sectionItems.every(n => n.done);
+        checkbox = `<input type="checkbox" class="header-checkbox" ${allDone ? 'checked' : ''} title="勾選＝整節標記完成">`;
+      } else {
+        checkbox = `<input type="checkbox" ${item.done ? 'checked' : ''}>`;
+      }
       const toggleTitle = isHeader ? '改成子項目' : '改成大標題';
       const toggleIcon = isHeader ? '↧' : '↥';
-      return `
+      const isCollapsed = isHeader && collapsedHeaderIds.has(item.id);
+      const collapseBtn = isHeader
+        ? `<button type="button" class="section-collapse-btn ${isCollapsed ? 'collapsed' : ''}" title="收合／展開這一節">▾</button>`
+        : '';
+      rowsHTML.push(`
       <div class="checklist-item ${rowClass}" data-item-id="${item.id}">
+        ${collapseBtn}
         <span class="drag-handle" title="拖曳排序">⠿</span>
         <button type="button" class="type-toggle" title="${toggleTitle}">${toggleIcon}</button>
         ${checkbox}
         <input type="text" value="${escapeHTML(item.text)}">
         <button type="button" class="remove-item">×</button>
-      </div>`;
-    }).join('');
+      </div>`);
+    });
+    container.innerHTML = rowsHTML.join('');
     container.querySelectorAll('.checklist-item').forEach(row=>{
       const id = row.dataset.itemId;
       const item = draftItems.find(i=>i.id === id);
+      const isHeaderRow = item.type === 'header';
       const checkboxEl = row.querySelector('input[type=checkbox]');
       if(checkboxEl){
         checkboxEl.addEventListener('change', (e)=>{
-          item.done = e.target.checked;
+          if(isHeaderRow){
+            const sectionItems = sectionItemsForHeader(id);
+            sectionItems.forEach(n => n.done = e.target.checked);
+          } else {
+            item.done = e.target.checked;
+          }
           renderChecklist();
           syncProgressWithItems();
+        });
+      }
+      const collapseBtnEl = row.querySelector('.section-collapse-btn');
+      if(collapseBtnEl){
+        collapseBtnEl.addEventListener('click', ()=>{
+          if(collapsedHeaderIds.has(id)) collapsedHeaderIds.delete(id);
+          else collapsedHeaderIds.add(id);
+          renderChecklist();
         });
       }
       row.querySelector('input[type=text]').addEventListener('input', (e)=>{
@@ -2828,6 +2897,21 @@ function addLinesAsType(forcedType){
   showToast(`已新增 ${lines.length} 個${forcedType === 'header' ? '大標題' : '子項目'}`);
 }
 document.getElementById('addAsHeaderBtn').addEventListener('click', ()=> addLinesAsType('header'));
+document.getElementById('markAllDoneBtn').addEventListener('click', ()=>{
+  const checkableItems = draftItems.filter(n => n.type === 'item');
+  if(checkableItems.length === 0){ showToast('還沒有子項目可以標記'); return; }
+  const allAlreadyDone = checkableItems.every(n => n.done);
+  if(allAlreadyDone){
+    if(!confirm('目前全部都已經是完成狀態，要改成全部取消勾選嗎？')) return;
+    checkableItems.forEach(n => n.done = false);
+    showToast('已全部取消勾選');
+  } else {
+    checkableItems.forEach(n => n.done = true);
+    showToast('已全部標記完成');
+  }
+  renderChecklist();
+  syncProgressWithItems();
+});
 document.getElementById('addAsItemBtn').addEventListener('click', ()=> addLinesAsType('item'));
 
 function parseOutlineToNodes(raw){
@@ -2869,6 +2953,7 @@ document.getElementById('bulkAddBtn').addEventListener('click', ()=>{
 function openModal(id){
   if(isShareView) return;
   editingId = id || null;
+  collapsedHeaderIds = new Set();
   const form = document.getElementById('courseForm');
   form.reset();
   document.getElementById('progressFallback').value = '0';
