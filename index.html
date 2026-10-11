@@ -722,7 +722,7 @@ select.filter-select{
     <div class="section-title">🔥 優先完成課程（進度達 60%）<span class="count-badge" id="priorityCount">0</span></div>
     <div id="priorityContainer"></div>
 
-    <div class="section-title">⏰ 即將到期（到期前 10 天）</div>
+    <div class="section-title">⏰ 即將到期（到期前 30 天）</div>
     <div id="dashboardSoon"></div>
   </section>
 
@@ -936,6 +936,10 @@ select.filter-select{
           <div class="checklist-mark-all-row">
             <span class="field-hint">課程已經上完了？</span>
             <button type="button" id="markAllDoneBtn">✓ 全部標記完成</button>
+          </div>
+          <div class="checklist-mark-all-row">
+            <span class="field-hint">想把這份大綱分享給朋友？</span>
+            <button type="button" id="shareOutlineBtn">🔗 分享大綱給朋友</button>
           </div>
           <div class="checklist-items" id="checklistItems"></div>
         </div>
@@ -1378,7 +1382,7 @@ function courseCardHTML(c){
   if(c.dueDate){
     if(s !== 'done' && days !== null && days < 0){
       dueHTML = `<span class="due-badge due-overdue">已逾期 ${Math.abs(days)} 天</span>`;
-    } else if(s !== 'done' && days !== null && days <= 10){
+    } else if(s !== 'done' && days !== null && days <= 30){
       dueHTML = `<span class="due-badge due-soon">⏰ ${days === 0 ? '今天到期' : days + ' 天後到期'}</span>`;
     } else {
       dueHTML = `<span class="due-badge due-normal">到期日 ${c.dueDate}</span>`;
@@ -1453,7 +1457,7 @@ function renderDashboard(){
     const s = statusOf(c);
     if(s==='done' || !c.dueDate) return false;
     const d = daysUntil(c.dueDate);
-    return d !== null && d <= 10;
+    return d !== null && d <= 30;
   }).length;
   const completionRate = total > 0 ? Math.round((done / total) * 100) : 0;
 
@@ -1461,7 +1465,7 @@ function renderDashboard(){
     <div class="stat-card blue clickable" id="statTotalCourses"><div class="num">${total}</div><div class="label">總課程數</div></div>
     <div class="stat-card sage"><div class="num">${done}</div><div class="label">已完成</div></div>
     <div class="stat-card sage"><div class="num">${completionRate}%</div><div class="label">完課率</div></div>
-    <div class="stat-card warn"><div class="num">${soon}</div><div class="label">10 天內到期</div></div>
+    <div class="stat-card warn"><div class="num">${soon}</div><div class="label">30 天內到期</div></div>
   `;
   document.getElementById('statTotalCourses').addEventListener('click', ()=> goToPage('list'));
 
@@ -1469,7 +1473,7 @@ function renderDashboard(){
     const s = statusOf(c);
     if(s==='done' || !c.dueDate) return false;
     const d = daysUntil(c.dueDate);
-    return d !== null && d <= 10;
+    return d !== null && d <= 30;
   }).sort((a,b)=>daysUntil(a.dueDate)-daysUntil(b.dueDate));
 
   const dashSoon = document.getElementById('dashboardSoon');
@@ -2281,7 +2285,7 @@ function progressItemHTML(c){
   if(c.dueDate){
     if(s !== 'done' && days !== null && days < 0){
       dueHTML = `<span class="due-badge due-overdue">已逾期 ${Math.abs(days)} 天</span>`;
-    } else if(s !== 'done' && days !== null && days <= 10){
+    } else if(s !== 'done' && days !== null && days <= 30){
       dueHTML = `<span class="due-badge due-soon">⏰ ${days === 0 ? '今天到期' : days + ' 天後到期'}</span>`;
     } else {
       dueHTML = `<span class="due-badge due-normal">到期日 ${c.dueDate}</span>`;
@@ -2913,6 +2917,95 @@ document.getElementById('markAllDoneBtn').addEventListener('click', ()=>{
   syncProgressWithItems();
 });
 document.getElementById('addAsItemBtn').addEventListener('click', ()=> addLinesAsType('item'));
+
+// ---------- 分享課程大綱給朋友（讓朋友點連結就能把這份大綱加進自己的課程清單） ----------
+document.getElementById('shareOutlineBtn').addEventListener('click', async ()=>{
+  if(!draftItems || draftItems.length === 0){
+    showToast('請先新增課程大綱內容，才能分享給朋友');
+    return;
+  }
+  const name = document.getElementById('courseName').value.trim() || '課程';
+  // 只打包大綱的「章節結構」（標題／子項目文字），不包含進度、到期日、備註等個人資料，
+  // 朋友收到後會是一份全新、尚未開始的大綱。
+  const payload = {
+    v: 1,
+    name,
+    items: draftItems.map(i => ({ type: i.type === 'header' ? 'header' : 'item', text: i.text || '' }))
+  };
+  let encoded;
+  try{
+    encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(payload)))));
+  }catch(e){
+    showToast('產生分享連結失敗，請稍後再試');
+    return;
+  }
+  const base = window.location.origin + window.location.pathname;
+  const link = `${base}?importOutline=${encoded}`;
+  const shareText = `這是我整理的「${name}」課程大綱，點連結就能直接加入你的課程清單！`;
+  if(navigator.share){
+    try{
+      await navigator.share({ title: '課程大綱：' + name, text: shareText, url: link });
+      return;
+    }catch(e){
+      // 使用者取消分享，改用複製連結的方式
+    }
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(link).then(()=>{
+      showToast('大綱分享連結已複製，貼給朋友就可以了');
+    }).catch(()=> copyViaFallback(link));
+  } else {
+    copyViaFallback(link);
+  }
+});
+
+// 朋友點了分享連結進來時，解析連結裡的大綱內容，詢問是否要加入自己的課程清單
+function handleImportOutline(encoded){
+  loadCourses();
+  loadAllTags();
+  loadTagColors();
+  seedIfEmpty();
+  let payload = null;
+  try{
+    const json = decodeURIComponent(escape(atob(decodeURIComponent(encoded))));
+    payload = JSON.parse(json);
+  }catch(e){
+    payload = null;
+  }
+  renderAll();
+  if(initSupabaseClient()){
+    checkExistingSession();
+  }
+  // 清掉網址上的參數，避免重新整理頁面時又跳出一次匯入提示
+  history.replaceState(null, '', window.location.origin + window.location.pathname);
+  if(!payload || !payload.items){
+    showToast('這個大綱分享連結已經損壞，請請朋友重新分享一次');
+    return;
+  }
+  const itemCount = payload.items.length;
+  const courseName = payload.name || '課程';
+  const ok = confirm(`朋友跟你分享了課程大綱：「${courseName}」（共 ${itemCount} 項），要加入你的課程清單嗎？`);
+  if(!ok) return;
+  const newCourse = {
+    id: uid(),
+    name: courseName,
+    alias: '',
+    tags: [],
+    startDate: '',
+    dueDate: '',
+    duration: '',
+    progress: 0,
+    note: '',
+    loginUrl: '',
+    items: payload.items.map(i => ({ id: uid(), type: i.type === 'header' ? 'header' : 'item', text: i.text || '', done: false })),
+    recurring: [],
+    lastActivity: new Date().toISOString().slice(0,10)
+  };
+  courses.push(newCourse);
+  saveCourses();
+  renderAll();
+  showToast(`已加入「${courseName}」，可以開始上課囉！`);
+}
 
 function parseOutlineToNodes(raw){
   return raw
@@ -3862,7 +3955,9 @@ async function initShareViewer(){
 }
 
 // ---------- Init ----------
-if(new URLSearchParams(window.location.search).has('share')){
+if(new URLSearchParams(window.location.search).has('importOutline')){
+  handleImportOutline(new URLSearchParams(window.location.search).get('importOutline'));
+} else if(new URLSearchParams(window.location.search).has('share')){
   initShareViewer();
 } else {
 loadCourses();
