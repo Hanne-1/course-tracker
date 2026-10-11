@@ -196,7 +196,7 @@ main{max-width:960px; margin:0 auto; padding:22px 20px 40px;}
 .completion-count-badge{ font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:99px; background:var(--cream, #F5F3EE); color:var(--gray); flex-shrink:0; }
 .completion-block-rows{ display:flex; flex-direction:column; }
 .completion-row{
-  display:flex; align-items:center; gap:10px; padding:8px 0;
+  display:flex; align-items:center; gap:10px; padding:8px 0; flex-wrap:wrap;
   border-top:1px solid rgba(55,53,47,0.06);
 }
 .completion-block-rows .completion-row:first-child{ border-top:none; padding-top:0; }
@@ -204,9 +204,18 @@ main{max-width:960px; margin:0 auto; padding:22px 20px 40px;}
   font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:99px; flex-shrink:0;
   background:var(--sage-bg, #E7EFE5); color:var(--sage, #6B8F71);
 }
-.completion-span{ flex:1; font-size:12px; color:var(--gray); }
+.completion-dates{ flex:1; min-width:0; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.completion-dates input[type="date"]{
+  font-family:inherit; font-size:11.5px; color:var(--dark); background:var(--cream, #F5F3EE);
+  border:1px solid rgba(55,53,47,0.1); border-radius:7px; padding:5px 6px; max-width:128px;
+}
+.completion-arrow{ font-size:11px; color:var(--gray); flex-shrink:0; }
+.completion-days{ font-size:11.5px; color:var(--gray); flex-shrink:0; }
 .completion-delete{ background:none; border:none; cursor:pointer; font-size:13px; color:var(--gray); padding:4px; flex-shrink:0; }
 .completion-delete:hover{ color:var(--pink, #C9938A); }
+.completion-badge-open{ background:var(--pink-bg, #F5E6E3); color:var(--pink, #C9938A); }
+.completion-clear-open{ background:none; border:none; cursor:pointer; font-size:13px; color:var(--gray); padding:4px; flex-shrink:0; }
+.completion-clear-open:hover{ color:var(--pink, #C9938A); }
 
 /* ---------- Auto schedule wizard ---------- */
 .as-mode-card{ background:var(--cream); border:2px solid transparent; border-radius:14px; padding:14px; margin-bottom:10px; }
@@ -800,10 +809,18 @@ select.filter-select{
 
   <!-- Completion Log -->
   <section class="page" id="page-completions">
-    <div class="section-title">📜 完課紀錄</div>
+    <div class="section-title" style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+      <span>📜 完課紀錄</span>
+      <select id="completionSortSelect" style="padding:7px 10px; border-radius:8px; border:1px solid rgba(55,53,47,0.12); font-family:inherit; font-size:12.5px; background:#fff; color:var(--dark);">
+        <option value="status">排序：進行中優先</option>
+        <option value="finish">排序：完成日期</option>
+        <option value="start">排序：開始日期</option>
+        <option value="count">排序：完課次數最多</option>
+      </select>
+    </div>
 
     <div class="checklist-box" style="margin-bottom:20px;">
-      <p class="field-hint" style="margin-bottom:10px;">課程進度到 100% 時會自動留下一筆紀錄；也可以在這裡手動補登（例如想起之前上過的課，或記錄這次複習）。</p>
+      <p class="field-hint" style="margin-bottom:10px;">課程進度到 100% 時會自動留下一筆紀錄；也可以在這裡手動補登。開始日、完成日至少填一項：只填開始日，代表這堂課還在上、之後上完會自動補完成日；兩個都填，代表補登一筆完整的過去紀錄。</p>
       <div class="schedule-add-row">
         <div style="flex:2 1 160px;">
           <label class="field-hint" style="display:block; margin-bottom:4px;">課程</label>
@@ -814,7 +831,7 @@ select.filter-select{
           <input type="date" id="completionStartInput" style="width:100%; padding:9px 11px; border:1px solid rgba(55,53,47,0.12); border-radius:9px; font-family:inherit; font-size:13px; background:#fff; color:var(--dark);">
         </div>
         <div style="flex:1 1 130px;">
-          <label for="completionFinishInput" class="field-hint" style="display:block; margin-bottom:4px;">完成日 *</label>
+          <label for="completionFinishInput" class="field-hint" style="display:block; margin-bottom:4px;">完成日（選填）</label>
           <input type="date" id="completionFinishInput" style="width:100%; padding:9px 11px; border:1px solid rgba(55,53,47,0.12); border-radius:9px; font-family:inherit; font-size:13px; background:#fff; color:var(--dark);">
         </div>
       </div>
@@ -1340,11 +1357,11 @@ function daysBetween(startStr, finishStr){
 // 完課紀錄本身存好之後不會再被自動改動或清掉，只有使用者自己在「完課紀錄」頁籤手動新增／刪除才會變動。
 function applyProgressChange(course, prevProgress){
   const newProgress = course.progress || 0;
-  if(newProgress === 0){
-    // 進度被歸零（例如重新開始、或取消全部勾選），這一輪還沒開始算，開始日跟著清空
+  if(newProgress === 0 && prevProgress > 0){
+    // 進度真的從有變回 0（例如重新開始、或取消全部勾選），這一輪算是取消了，開始日跟著清空
     course.roundStartDate = '';
-  } else if(prevProgress === 0 && !course.roundStartDate){
-    // 進度第一次離開 0，視為這一輪的開始日
+  } else if(newProgress > 0 && prevProgress === 0 && !course.roundStartDate){
+    // 進度第一次離開 0，視為這一輪的開始日（如果使用者已經手動先記過開始日，不會覆蓋掉）
     course.roundStartDate = new Date().toISOString().slice(0,10);
   }
   if(prevProgress < 100 && newProgress >= 100){
@@ -2491,26 +2508,44 @@ function renderAll(){
 
 // ---------- Completion log ----------
 function completionRowHTML(course, entry, indexInCourse){
-  const span = entry.startDate ? `${entry.startDate} → ${entry.finishDate}` : `完成於 ${entry.finishDate}`;
   const days = daysBetween(entry.startDate, entry.finishDate);
-  const daysText = days !== null ? `　・共 ${days} 天` : '';
+  const daysText = days !== null ? `共 ${days} 天` : '';
   return `
   <div class="completion-row" data-course-id="${course.id}" data-entry-id="${entry.id}">
     <span class="completion-badge">第 ${indexInCourse} 次</span>
-    <span class="completion-span">${span}${daysText}</span>
+    <div class="completion-dates">
+      <input type="date" class="completion-start-input" value="${entry.startDate || ''}" title="開始日（選填，可編輯）">
+      <span class="completion-arrow">→</span>
+      <input type="date" class="completion-finish-input" value="${entry.finishDate || ''}" title="完成日（可編輯）">
+      <span class="completion-days">${daysText}</span>
+    </div>
     <button type="button" class="completion-delete" title="刪除這筆紀錄">🗑</button>
   </div>`;
 }
 
+function completionOpenRowHTML(course){
+  return `
+  <div class="completion-row completion-row-open" data-course-id="${course.id}">
+    <span class="completion-badge completion-badge-open">進行中</span>
+    <div class="completion-dates">
+      <input type="date" class="completion-open-start-input" value="${course.roundStartDate || ''}" title="這一輪的開始日（可編輯）">
+      <span class="completion-days">尚未上完</span>
+    </div>
+    <button type="button" class="completion-clear-open" title="清除這筆「進行中」的開始日">✕</button>
+  </div>`;
+}
+
 function completionBlockHTML(course, entries){
+  const openRowHTML = course.roundStartDate ? completionOpenRowHTML(course) : '';
   const rowsHTML = entries.map((entry, i) => completionRowHTML(course, entry, i + 1)).join('');
+  const countLabel = entries.length > 0 ? `共 ${entries.length} 次` : '尚未完成過';
   return `
   <div class="completion-block">
     <div class="completion-block-header">
       <span class="completion-course-name">${escapeHTML(displayName(course))}</span>
-      <span class="completion-count-badge">共 ${entries.length} 次</span>
+      <span class="completion-count-badge">${countLabel}</span>
     </div>
-    <div class="completion-block-rows">${rowsHTML}</div>
+    <div class="completion-block-rows">${openRowHTML}${rowsHTML}</div>
   </div>`;
 }
 
@@ -2526,20 +2561,47 @@ function renderCompletions(){
   const emptyEl = document.getElementById('completionsEmpty');
   if(!listEl) return;
 
-  // 同一堂課的所有完課紀錄放在同一個區塊裡，區塊依該課程「最近一次完成日」由新到舊排序，
-  // 區塊內的每一筆則由舊到新排列，第 1 次、第 2 次才會照時間順序對上。
+  // 同一堂課的所有完課紀錄放在同一個區塊裡；區塊內的每一筆由舊到新排列，
+  // 第 1 次、第 2 次才會照時間順序對上。區塊彼此之間的排序則依下面選的排序方式決定。
   const courseBlocks = courses
     .map(course => ({
       course,
       entries: (course.completions || []).slice().sort((a,b)=> (a.finishDate||'').localeCompare(b.finishDate||''))
     }))
-    .filter(block => block.entries.length > 0);
+    .filter(block => block.entries.length > 0 || block.course.roundStartDate);
 
-  courseBlocks.sort((a, b) => {
-    const aLast = a.entries[a.entries.length - 1].finishDate || '';
-    const bLast = b.entries[b.entries.length - 1].finishDate || '';
-    return bLast.localeCompare(aLast);
-  });
+  // 排序用的小工具：取「最相關的開始日」「最相關的完成日」
+  // （進行中的課用正在記錄的開始日；已有紀錄的課用最後一筆的開始／完成日）
+  function sortStartKey(block){
+    if(block.course.roundStartDate) return block.course.roundStartDate;
+    if(block.entries.length) return block.entries[block.entries.length - 1].startDate || '';
+    return '';
+  }
+  function sortFinishKey(block){
+    if(block.entries.length) return block.entries[block.entries.length - 1].finishDate || '';
+    return '';
+  }
+
+  const sortSel = document.getElementById('completionSortSelect');
+  const sortMode = sortSel ? sortSel.value : 'status';
+  if(sortMode === 'status'){
+    // 進行中的課排最前面，組內再依最相關日期新到舊排；已完成的課排在後面，依最近完成日新到舊排
+    courseBlocks.sort((a, b) => {
+      const aOpen = a.course.roundStartDate ? 1 : 0;
+      const bOpen = b.course.roundStartDate ? 1 : 0;
+      if(aOpen !== bOpen) return bOpen - aOpen;
+      const aKey = aOpen ? sortStartKey(a) : sortFinishKey(a);
+      const bKey = bOpen ? sortStartKey(b) : sortFinishKey(b);
+      return bKey.localeCompare(aKey);
+    });
+  } else if(sortMode === 'start'){
+    courseBlocks.sort((a, b) => sortStartKey(b).localeCompare(sortStartKey(a)));
+  } else if(sortMode === 'count'){
+    courseBlocks.sort((a, b) => b.entries.length - a.entries.length);
+  } else {
+    // 'finish'：依完成日期，最近完成的排最前面
+    courseBlocks.sort((a, b) => sortFinishKey(b).localeCompare(sortFinishKey(a)));
+  }
 
   if(courseBlocks.length === 0){
     listEl.innerHTML = '';
@@ -2552,6 +2614,19 @@ function renderCompletions(){
 
 document.getElementById('completionsList').addEventListener('click', (e)=>{
   if(isShareView) return;
+  const clearOpenBtn = e.target.closest('.completion-clear-open');
+  if(clearOpenBtn){
+    const row = e.target.closest('.completion-row-open');
+    const courseId = row.dataset.courseId;
+    const course = courses.find(c=>c.id === courseId);
+    if(!course) return;
+    if(!confirm('確定要清除這筆「進行中」的開始日紀錄嗎？')) return;
+    course.roundStartDate = '';
+    saveCourses();
+    renderAll();
+    showToast('已清除');
+    return;
+  }
   const delBtn = e.target.closest('.completion-delete');
   if(!delBtn) return;
   const row = e.target.closest('.completion-row');
@@ -2566,6 +2641,48 @@ document.getElementById('completionsList').addEventListener('click', (e)=>{
   showToast('已刪除這筆紀錄');
 });
 
+// 起訖日期都可以直接在列表上編輯，改完直接儲存（不用另外按確定）
+document.getElementById('completionsList').addEventListener('change', (e)=>{
+  if(isShareView) return;
+  const input = e.target;
+  if(input.classList.contains('completion-open-start-input')){
+    const row = input.closest('.completion-row-open');
+    const courseId = row.dataset.courseId;
+    const course = courses.find(c=>c.id === courseId);
+    if(!course) return;
+    course.roundStartDate = input.value || '';
+    saveCourses();
+    renderAll();
+    showToast('已更新開始日');
+    return;
+  }
+  const isStart = input.classList.contains('completion-start-input');
+  const isFinish = input.classList.contains('completion-finish-input');
+  if(!isStart && !isFinish) return;
+  const row = input.closest('.completion-row');
+  const courseId = row.dataset.courseId;
+  const entryId = row.dataset.entryId;
+  const course = courses.find(c=>c.id === courseId);
+  if(!course) return;
+  const entry = (course.completions || []).find(en => en.id === entryId);
+  if(!entry) return;
+  if(isFinish && !input.value){
+    showToast('完成日不能清空，如果要刪除這筆紀錄請用垃圾桶');
+    input.value = entry.finishDate || '';
+    return;
+  }
+  if(isStart){
+    entry.startDate = input.value || '';
+  } else {
+    entry.finishDate = input.value;
+  }
+  saveCourses();
+  renderAll();
+  showToast('已更新這筆紀錄的日期');
+});
+
+document.getElementById('completionSortSelect').addEventListener('change', renderCompletions);
+
 document.getElementById('addCompletionBtn').addEventListener('click', ()=>{
   if(isShareView) return;
   const courseId = document.getElementById('completionCourseSelect').value;
@@ -2575,12 +2692,23 @@ document.getElementById('addCompletionBtn').addEventListener('click', ()=>{
     showToast('請先新增一堂課程，才能記錄完課');
     return;
   }
-  if(!finishDate){
-    showToast('請至少填寫完成日');
+  if(!startDate && !finishDate){
+    showToast('請至少填寫開始日或完成日其中一項');
     return;
   }
   const course = courses.find(c=>c.id === courseId);
   if(!course) return;
+
+  if(!finishDate){
+    // 還沒上完，只先記下這一輪的開始日；等之後進度到 100% 時，會自動用這個開始日算進完課紀錄
+    course.roundStartDate = startDate;
+    saveCourses();
+    document.getElementById('completionStartInput').value = '';
+    renderAll();
+    showToast('已記錄這一輪的開始日，等你上完時會自動算進完課紀錄');
+    return;
+  }
+
   course.completions = course.completions || [];
   course.completions.push({ id: uid(), startDate, finishDate, note: '' });
   saveCourses();
