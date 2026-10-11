@@ -2919,6 +2919,15 @@ document.getElementById('markAllDoneBtn').addEventListener('click', ()=>{
 document.getElementById('addAsItemBtn').addEventListener('click', ()=> addLinesAsType('item'));
 
 // ---------- 分享課程大綱給朋友（讓朋友點連結就能把這份大綱加進自己的課程清單） ----------
+function genShareToken(){
+  return (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() :
+    'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c=>{
+      const r = Math.random()*16|0, v = c === 'x' ? r : (r&0x3|0x8);
+      return v.toString(16);
+    });
+}
+const SHARE_TOKEN_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 document.getElementById('shareOutlineBtn').addEventListener('click', async ()=>{
   if(!draftItems || draftItems.length === 0){
     showToast('請先新增課程大綱內容，才能分享給朋友');
@@ -2932,15 +2941,34 @@ document.getElementById('shareOutlineBtn').addEventListener('click', async ()=>{
     name,
     items: draftItems.map(i => ({ type: i.type === 'header' ? 'header' : 'item', text: i.text || '' }))
   };
-  let encoded;
-  try{
-    encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(payload)))));
-  }catch(e){
-    showToast('產生分享連結失敗，請稍後再試');
-    return;
-  }
   const base = window.location.origin + window.location.pathname;
-  const link = `${base}?importOutline=${encoded}`;
+  let link = null;
+
+  // 優先把大綱存到雲端，連結裡只放一個短短的 token，連結才不會長得很誇張。
+  if(!supabaseClient){ initSupabaseClient(); }
+  if(supabaseClient){
+    try{
+      const token = genShareToken();
+      const { error } = await supabaseClient.from('shared_outlines').insert({ token, name: payload.name, items: payload.items });
+      if(!error){
+        link = `${base}?importOutline=${token}`;
+      }
+    }catch(e){
+      // 雲端儲存失敗（例如還沒設定資料表、或暫時沒有網路），底下會自動改用備用方式
+    }
+  }
+
+  // 雲端儲存失敗時的備用方式：把大綱直接編碼進連結裡。連結會變長，但仍然可以正常分享、正常匯入。
+  if(!link){
+    try{
+      const encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(payload)))));
+      link = `${base}?importOutline=${encoded}`;
+    }catch(e){
+      showToast('產生分享連結失敗，請稍後再試');
+      return;
+    }
+  }
+
   const shareText = `這是我整理的「${name}」課程大綱，點連結就能直接加入你的課程清單！`;
   if(navigator.share){
     try{
@@ -2960,26 +2988,41 @@ document.getElementById('shareOutlineBtn').addEventListener('click', async ()=>{
 });
 
 // 朋友點了分享連結進來時，解析連結裡的大綱內容，詢問是否要加入自己的課程清單
-function handleImportOutline(encoded){
+async function handleImportOutline(raw){
   loadCourses();
   loadAllTags();
   loadTagColors();
   seedIfEmpty();
+  initSupabaseClient();
+
   let payload = null;
-  try{
-    const json = decodeURIComponent(escape(atob(decodeURIComponent(encoded))));
-    payload = JSON.parse(json);
-  }catch(e){
-    payload = null;
+  if(SHARE_TOKEN_PATTERN.test(raw) && supabaseClient){
+    try{
+      const { data, error } = await supabaseClient.from('shared_outlines').select('name, items').eq('token', raw).maybeSingle();
+      if(!error && data){
+        payload = { name: data.name, items: data.items };
+      }
+    }catch(e){
+      payload = null;
+    }
   }
+  if(!payload){
+    try{
+      const json = decodeURIComponent(escape(atob(decodeURIComponent(raw))));
+      payload = JSON.parse(json);
+    }catch(e){
+      payload = null;
+    }
+  }
+
   renderAll();
-  if(initSupabaseClient()){
+  if(supabaseClient){
     checkExistingSession();
   }
   // 清掉網址上的參數，避免重新整理頁面時又跳出一次匯入提示
   history.replaceState(null, '', window.location.origin + window.location.pathname);
   if(!payload || !payload.items){
-    showToast('這個大綱分享連結已經損壞，請請朋友重新分享一次');
+    showToast('這個大綱分享連結已經失效或損壞，請請朋友重新分享一次');
     return;
   }
   const itemCount = payload.items.length;
